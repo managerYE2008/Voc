@@ -33,10 +33,7 @@
                 layout="@layout/card_front"
                 android:visibility="gone" />
 
-            <include
-                android:id="@+id/card_annonation"
-                layout="@layout/card_annonation"
-                android:visibility="gone" />
+
 
         </FrameLayout>
 

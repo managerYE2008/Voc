@@ -78,7 +78,7 @@ public class CardPageTransformer implements ViewPager2.PageTransformer {
                     if (fragment != null) {
                         if (Math.abs(position) < 0.1f) {
                             fragment.switchFromBack();
-                        } else if (Math.abs(position) > 0.2f) {
+                        } else if (Math.abs(position) > 0.4f) {
                             fragment.resetToBack();
                         }
                     }

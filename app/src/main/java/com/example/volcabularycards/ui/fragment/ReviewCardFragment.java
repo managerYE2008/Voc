@@ -31,13 +31,17 @@ public class ReviewCardFragment extends Fragment {
     private TextView wordTextView;
     private TextView meaningTextView;
     
-    // 0: back, 1: front, 2: annotation
+    // 0: back, 1: front
     private int cardState = 0;
-    private boolean isAnimating = false;
     
     private ConstraintLayout FrontCard;
     private ConstraintLayout BackCard;
-    private ConstraintLayout AnnotationCard;
+    
+    private ConstraintLayout AnnotationsLayout;
+    private ConstraintLayout TextLayout;
+    
+    private boolean isAnimating = false;
+    private static final int ANIMATION_DURATION = 250;
 
     @Nullable
     @Override
@@ -54,10 +58,15 @@ public class ReviewCardFragment extends Fragment {
         
         FrontCard = view.findViewById(R.id.card_front);
         BackCard = view.findViewById(R.id.card_back);
-        AnnotationCard = view.findViewById(R.id.card_annonation);
+        
+        // 从 include 布局的根节点获取子视图
+        AnnotationsLayout = FrontCard.findViewById(R.id.Annotations);
+        TextLayout = FrontCard.findViewById(R.id.TextView);
+        
+        Log.d(TAG, "AnnotationsLayout: " + (AnnotationsLayout != null ? "not null" : "null"));
+        Log.d(TAG, "TextLayout: " + (TextLayout != null ? "not null" : "null"));
 
         BackCard.setVisibility(View.VISIBLE);
-        AnnotationCard.setVisibility(View.GONE);
         FrontCard.setVisibility(View.GONE);
         cardState = 0;
         
@@ -76,14 +85,12 @@ public class ReviewCardFragment extends Fragment {
         cardView.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                if(AnnotationCard.getVisibility() == View.VISIBLE){
-                    AnnotationCard.setVisibility(View.GONE);
-                    FrontCard.setVisibility(View.VISIBLE);
-                }else{
-                    FrontCard.setVisibility(View.GONE);
-                    AnnotationCard.setVisibility(View.VISIBLE);
-                }
                 Log.d(TAG, "onClick called, cardState:"+cardState);
+                if (cardState == 1) {
+                    toggleAnnotationWithAnimation();
+                } else if (cardState == 0) {
+                    switchFromBack();
+                }
             }
         });
         return view;
@@ -106,12 +113,6 @@ public class ReviewCardFragment extends Fragment {
             FrontCard.setAlpha(1f);
             FrontCard.setTranslationY(0f);
             
-            if (AnnotationCard != null) {
-                AnnotationCard.setVisibility(View.GONE);
-                AnnotationCard.setAlpha(1f);
-                AnnotationCard.setTranslationY(0f);
-            }
-            
             BackCard.setVisibility(View.VISIBLE);
             BackCard.setAlpha(1f);
             BackCard.setTranslationY(0f);
@@ -124,10 +125,68 @@ public class ReviewCardFragment extends Fragment {
         if (getView() != null && !isAnimating && cardState == 0) {
             BackCard.setVisibility(View.GONE);
             FrontCard.setVisibility(View.VISIBLE);
-            if (AnnotationCard != null) {
-                AnnotationCard.setVisibility(View.GONE);
-            }
+
             cardState = 1;
+        }
+    }
+    
+    private void toggleAnnotationWithAnimation() {
+        Log.d(TAG, "toggleAnnotationWithAnimation called");
+        if (isAnimating) return;
+        isAnimating = true;
+        
+        final boolean showAnnotation = AnnotationsLayout.getVisibility() == View.GONE;
+        
+        if (showAnnotation) {
+            // 从 TextView 切换到 Annotations
+            TextLayout.animate()
+                .alpha(0f)
+                .setDuration(ANIMATION_DURATION)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        Log.d(TAG, "TextLayout animation ended");
+
+                        TextLayout.setVisibility(View.GONE);
+                        TextLayout.setAlpha(1f);
+                        
+                        AnnotationsLayout.setVisibility(View.VISIBLE);
+                        AnnotationsLayout.setAlpha(0f);
+                        AnnotationsLayout.animate()
+                            .alpha(1f)
+                            .setDuration(ANIMATION_DURATION)
+                            .setListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    isAnimating = false;
+                                }
+                            });
+                    }
+                });
+        } else {
+            // 从 Annotations 切换到 TextView
+            AnnotationsLayout.animate()
+                .alpha(0f)
+                .setDuration(ANIMATION_DURATION)
+                .setListener(new AnimatorListenerAdapter() {
+                    @Override
+                    public void onAnimationEnd(Animator animation) {
+                        AnnotationsLayout.setVisibility(View.GONE);
+                        AnnotationsLayout.setAlpha(1f);
+                        
+                        TextLayout.setVisibility(View.VISIBLE);
+                        TextLayout.setAlpha(0f);
+                        TextLayout.animate()
+                            .alpha(1f)
+                            .setDuration(ANIMATION_DURATION)
+                            .setListener(new AnimatorListenerAdapter() {
+                                @Override
+                                public void onAnimationEnd(Animator animation) {
+                                    isAnimating = false;
+                                }
+                            });
+                    }
+                });
         }
     }
 }
