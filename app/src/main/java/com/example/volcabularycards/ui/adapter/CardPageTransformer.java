@@ -33,6 +33,9 @@ public class CardPageTransformer implements ViewPager2.PageTransformer {
         notifyFragmentOfPositionChange(page, position);
 
         View cardView = page.findViewById(R.id.review_card_view);
+        View frontCard = page.findViewById(R.id.card_front);
+        View backCard = page.findViewById(R.id.card_back);
+        
         int pageWidth = page.getWidth();
 
         float scaleFactor = Math.max(0.5f, MIN_SCALE + (1 - MIN_SCALE) * (1 - Math.abs(position)));
@@ -52,15 +55,42 @@ public class CardPageTransformer implements ViewPager2.PageTransformer {
         float rotationY = -position * MAX_ROTATION;
         page.setRotationY(rotationY);
 
-        // 只有中心位置的卡片才可以点击
-        // 当 position 接近 0 时（通常在 -0.1 到 0.1 之间），启用点击
+        updateCardFaceVisibility(frontCard, backCard, position);
+
         boolean isCenterPage = Math.abs(position) < 0.01f;
         if (cardView != null) {
             cardView.setClickable(isCenterPage);
             cardView.setEnabled(isCenterPage);
         }
     }
-    
+
+    private void updateCardFaceVisibility(View frontCard, View backCard, float position) {
+        if (frontCard == null || backCard == null) return;
+        
+        float absPosition = Math.abs(position);
+        
+        if (absPosition < 0.1f) {
+            frontCard.setVisibility(View.VISIBLE);
+            frontCard.setAlpha(1f);
+            backCard.setVisibility(View.GONE);
+            backCard.setAlpha(1f);
+        } else if (absPosition > 0.5f) {
+            frontCard.setVisibility(View.GONE);
+            frontCard.setAlpha(1f);
+            backCard.setVisibility(View.VISIBLE);
+            backCard.setAlpha(1f);
+        } else {
+            float rangePosition = (absPosition - 0.1f) / 0.4f;
+            float frontAlpha = 1f - rangePosition;
+            float backAlpha = rangePosition;
+            
+            frontCard.setVisibility(View.VISIBLE);
+            frontCard.setAlpha(frontAlpha);
+            backCard.setVisibility(View.VISIBLE);
+            backCard.setAlpha(backAlpha);
+        }
+    }
+
     private void notifyFragmentOfPositionChange(View page, float position) {
         RecyclerView recyclerView = (RecyclerView) viewPager.getChildAt(0);
         if (recyclerView == null) return;
