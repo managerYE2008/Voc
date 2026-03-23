@@ -17,7 +17,7 @@ public class WordViewModel extends AndroidViewModel {
     private final WordRepository repository;
     private final LiveData<List<Word>> allWords;
     private final MutableLiveData<Integer> totalCount = new MutableLiveData<>();
-    private final ExecutorService executorService;
+    private  ExecutorService executorService;
 
     private static final String TAG = "CardReviewActivity_viewmodel";
     
@@ -38,6 +38,7 @@ public class WordViewModel extends AndroidViewModel {
     protected void onCleared() {
         super.onCleared();
         //executorService.shutdown();
+        executorService.shutdown();
     }
     
     // ==================== 数据插入 ====================
@@ -113,5 +114,9 @@ public class WordViewModel extends AndroidViewModel {
     
     public LiveData<Integer> getTotalCountLive() {
         return totalCount;
+    }
+
+    public List<LiveData<Word>> getAllWordsListLive(){
+        return repository.getAllWordsListLive();
     }
 }

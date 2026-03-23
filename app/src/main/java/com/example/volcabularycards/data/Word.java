@@ -23,6 +23,12 @@ public class Word {
     @ColumnInfo(name="mastery_level",index=true,defaultValue = "0")
     private int masteryLevel;
 
+    @ColumnInfo(name="annotation")
+    private String annotation;
+
+    @ColumnInfo(name="image_path")
+    private String imagePath;
+
     public Word(String text, String meaning) {
         this.text = text;
         this.meaning = meaning;
@@ -73,5 +79,21 @@ public class Word {
 
     public void setMasteryLevel(int masteryLevel) {
         this.masteryLevel = masteryLevel;
+    }
+
+    public String getAnnotation() {
+        return annotation;
+    }
+
+    public void setAnnotation(String annotation) {
+        this.annotation = annotation;
+    }
+
+    public String getImagePath() {
+        return imagePath;
+    }
+
+    public void setImagePath(String imagePath) {
+        this.imagePath = imagePath;
     }
 }

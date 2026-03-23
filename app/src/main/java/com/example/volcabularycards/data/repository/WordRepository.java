@@ -30,7 +30,7 @@ public class WordRepository {
         
         Log.d(TAG, "Repository initialized");
         
-        this.allWordsLive.observeForever(words -> {
+        /*this.allWordsLive.observeForever(words -> {
             int size = words != null ? words.size() : 0;
            /*
             Log.d(TAG, "allWordsLive changed, size: " + size);
@@ -39,10 +39,12 @@ public class WordRepository {
                     Log.d(TAG, "Word " + i + ": " + words.get(i).getText());
                 }
             }
-            */
+
 
             totalCountLive.postValue(size);
         });
+
+         */
     }
     
     // ==================== Insert Operations ====================
@@ -143,6 +145,24 @@ public class WordRepository {
      */
     public int getTotalCount() {
         return wordDao.getTotalCount();
+    }
+
+    /**
+     * 获取所有单词的 LiveData 列表（每个单词独立的 LiveData）
+     * 注意：这个方法返回的是基于当前数据库状态的快照
+     * @return LiveData 列表
+     */
+    public List<LiveData<Word>> getAllWordsListLive() {
+        List<LiveData<Word>> result = new java.util.ArrayList<>();
+        LiveData<List<Word>> allWords = getAllWords();
+        
+        if (allWords.getValue() != null) {
+            for (Word word : allWords.getValue()) {
+                result.add(getWordById(word.getId()));
+            }
+        }
+        
+        return result;
     }
     
     // ==================== 复杂逻辑预留方法 ====================

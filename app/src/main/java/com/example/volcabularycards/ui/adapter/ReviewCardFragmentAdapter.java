@@ -6,6 +6,7 @@ import androidx.annotation.NonNull;
 import androidx.fragment.app.Fragment;
 import androidx.fragment.app.FragmentManager;
 import androidx.lifecycle.Lifecycle;
+import androidx.lifecycle.LiveData;
 import androidx.viewpager2.adapter.FragmentStateAdapter;
 
 import com.example.volcabularycards.data.Word;
@@ -18,7 +19,7 @@ import java.util.List;
 import java.util.Map;
 
 public class ReviewCardFragmentAdapter extends FragmentStateAdapter {
-    private final List<Word> words=new ArrayList<>();
+    private final List<LiveData<Word>> words=new ArrayList<>();
     private static final String TAG = "CardReviewActivity_Adapter";
     private Map<Integer, ReviewCardFragment> fragmentMap = new HashMap<>();
 
@@ -28,7 +29,7 @@ public class ReviewCardFragmentAdapter extends FragmentStateAdapter {
         Log.d(TAG, "Constructor called,wordsCount:"+words.size());
     }
 
-    public ReviewCardFragmentAdapter(@NonNull FragmentManager fragmentManager, @NonNull Lifecycle lifecycle, List<Word> words) {
+    public ReviewCardFragmentAdapter(@NonNull FragmentManager fragmentManager, @NonNull Lifecycle lifecycle, List<LiveData<Word>> words) {
         super(fragmentManager, lifecycle);
         this.words.addAll(words);
         Log.d(TAG, "Constructor called,wordsCount:"+words.size());
@@ -38,8 +39,8 @@ public class ReviewCardFragmentAdapter extends FragmentStateAdapter {
     @Override
     public Fragment createFragment(int position){
         Log.d(TAG, "createFragment called,position:"+position);
-        Word word=words.get(position);
-        ReviewCardFragment fragment = ReviewCardFragment.newInstance(word);
+        LiveData<Word> word=words.get(position);
+        ReviewCardFragment fragment = ReviewCardFragment.newInstance(position);
         fragmentMap.put(position, fragment);
         return fragment;
     }
@@ -50,10 +51,11 @@ public class ReviewCardFragmentAdapter extends FragmentStateAdapter {
         return words.size();
     }
 
-    public void addWord(Word word) {
-        words.add(word);
-        notifyItemInserted(words.size() - 1);
+    public LiveData<Word> getWord(int position) {
+        return words.get(position);
     }
+
+
     
     public void removeWord(Word word) {
         int position = words.indexOf(word);
@@ -66,7 +68,7 @@ public class ReviewCardFragmentAdapter extends FragmentStateAdapter {
     /**
      * 批量更新单词列表
      */
-    public void submitList(List<Word> newWords) {
+    public void submitList(List<LiveData<Word>> newWords) {
         Log.d(TAG, "submitList called, newWords size: " + (newWords != null ? newWords.size() : "null"));
         words.clear();
         fragmentMap.clear();

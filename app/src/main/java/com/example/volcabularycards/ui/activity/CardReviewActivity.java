@@ -1,10 +1,24 @@
 package com.example.volcabularycards.ui.activity;
 
+import android.content.Context;
+import android.os.Environment;
+import androidx.core.content.ContextCompat;
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
+
+import android.content.Intent;
 import android.os.Bundle;
+import android.os.Environment;
+
 import android.util.Log;
+import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
+import androidx.core.content.ContextCompat;
 import androidx.fragment.app.Fragment;
+import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
 import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
@@ -16,6 +30,10 @@ import com.example.volcabularycards.ui.adapter.ReviewCardFragmentAdapter;
 import com.example.volcabularycards.ui.fragment.ReviewCardFragment;
 import com.example.volcabularycards.ui.viewmodel.WordViewModel;
 
+import java.io.File;
+import java.io.FileOutputStream;
+import java.io.IOException;
+import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -27,8 +45,11 @@ public class CardReviewActivity extends AppCompatActivity {
     private ReviewCardFragmentAdapter adapter;
     private ViewPager2 viewPager;
     private int lastPosition = 0;
+    private Word currentWord;
 
-
+    // 添加按钮引用
+    private Button btnQuit;
+    private Button btnEdit;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,39 +68,133 @@ public class CardReviewActivity extends AppCompatActivity {
         
         // 设置页面变换器，实现卡片效果
         viewPager.setPageTransformer(new CardPageTransformer(viewPager));
-        
 
-        
+        // 初始化按钮
+        btnQuit = findViewById(R.id.btn_quit);
+        btnEdit = findViewById(R.id.btn_edit);
+
+        // 设置 Quit 按钮点击事件：返回 MainActivity
+        btnQuit.setOnClickListener(v -> {
+            finish(); // 结束当前 Activity，返回上一个界面
+        });
+
+        // 设置 Edit 按钮点击事件：跳转到 EditWordActivity
+        btnEdit.setOnClickListener(v -> {
+            if (currentWord != null) {
+                String currentImagePath = currentWord.getImagePath();
+                
+                // 检查图片路径是否有效
+                if (currentImagePath != null && !currentImagePath.isEmpty()) {
+                    java.io.File imageFile = new java.io.File(currentImagePath);
+                    if (!imageFile.exists()) {
+                        android.util.Log.w(TAG, "Image file does not exist: " + currentImagePath + 
+                                          ", clearing path for word: " + currentWord.getText());
+                        currentImagePath = null; // 清除无效路径
+                    }
+                }
+                
+                Log.d(TAG, "Editing word: id=" + currentWord.getId() + 
+                      ", text=" + currentWord.getText() + 
+                      ", annotation=" + currentWord.getAnnotation() +
+                      ", image_path=" + currentImagePath);
+                
+                Intent intent = new Intent(this, EditWordActivity.class);
+                Bundle bundle = new Bundle();
+                bundle.putInt("word_id", currentWord.getId());
+                bundle.putString("word_text", currentWord.getText());
+                bundle.putString("word_meaning", currentWord.getMeaning());
+                bundle.putString("word_annotation", currentWord.getAnnotation());
+                bundle.putString("image_path", currentImagePath);
+                intent.putExtras(bundle);
+                startActivity(intent);
+            } else {
+                Log.e(TAG, "currentWord is null when clicking Edit button!");
+            }
+        });
+
         Log.d(TAG, "ViewPager initialized,adapter created");
 
-        // 使用 LiveData 观察总数
-
-
-        // 直接观察所有单词的变化来更新 UI
-
-        
-        // 直接观察所有单词的变化来更新 UI
+        // 观察所有单词的变化来更新 UI
         wordViewModel.getAllWords().observe(this, words -> {
-
             int count = words != null ? words.size() : 0;
-            Log.d(TAG, "Total count: " + count);
-            if (count>0) {
-                Log.d(TAG, "Words received, count: " + words.size());
-                Log.d(TAG, "Updating adapter with " + words.size() + " words");
-                adapter.submitList(new ArrayList<>(words));
-            } else{
+            Log.d(TAG, "Words changed, count: " + count);
+            
+            if (count > 0) {
+                // 将 List<Word> 转换为 List<LiveData<Word>>
+                List<LiveData<Word>> wordLiveList = new ArrayList<>();
+                for (Word word : words) {
+                    wordLiveList.add(wordViewModel.getWordById(word.getId()));
+                }
+                
+                adapter.submitList(wordLiveList);
+                Log.d(TAG, "Adapter updated with " + wordLiveList.size() + " words");
+                
+                // 注册页面变化监听
+                viewPager.registerOnPageChangeCallback(new ViewPager2.OnPageChangeCallback() {
+                    @Override
+                    public void onPageSelected(int position) {
+                        super.onPageSelected(position);
+                        lastPosition = position;
+                        Log.d(TAG, "Page changed to position: " + position);
+                        
+                        // 获取并观察当前位置的单词
+                        if (position < wordLiveList.size()) {
+                            wordLiveList.get(position).observe(CardReviewActivity.this, word -> {
+                                currentWord = word;
+                                Log.d(TAG, "Current word at position " + position + ": " + (word != null ? word.getText() : "null"));
+                            });
+                        }
+                    }
+                });
+                
+                // 初始化当前显示的单词（使用 getCurrentItem 获取实际显示的位置）
+                int currentPosition = viewPager.getCurrentItem();
+                if (currentPosition < wordLiveList.size()) {
+                    wordLiveList.get(currentPosition).observe(this, word -> {
+                        currentWord = word;
+                        Log.d(TAG, "Initial word at position " + currentPosition + ": " + (word != null ? word.getText() : "null"));
+                    });
+                }
+            } else {
+                Log.d(TAG, "No words found, adding sample words...");
                 addSampleWords();
-
-                Log.d(TAG, "No words to display");
             }
         });
     }
     
+    @Override
+    protected void onResume() {
+        super.onResume();
+        // 当 Activity 恢复时，强制刷新数据
 
+    }
+    
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode, Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+        if (resultCode == RESULT_OK) {
+            // 当从 EditWordActivity 返回且数据已更改时，刷新数据
+
+        }
+    }
     
     private void addSampleWords() {
         Log.d(TAG, "Adding sample words...");
         List<Word> sampleWords = new ArrayList<>();
+
+        // 为第一个词 Voc 添加图片
+        Word word0 = new Word();
+        word0.setText("Voc");
+        word0.setMeaning("全世界最好的应用");
+        word0.setAnnotation("不是woc是Voc");
+
+        // 复制 drawable 资源到内部存储并获取路径
+        String imagePath = copyImageFromDrawableToInternalStorage(R.drawable.author);
+        word0.setImagePath(imagePath);
+
+        sampleWords.add(word0);
+
+        // 后续单词保持不变...
         Word word1 = new Word();
         word1.setText("apple");
         word1.setMeaning("苹果");
@@ -132,5 +247,57 @@ public class CardReviewActivity extends AppCompatActivity {
         
         wordViewModel.insertAll(sampleWords);
         Log.d(TAG, "Sample words inserted, count: " + sampleWords.size());
+    }
+
+    /**
+     * 将 drawable 资源复制到应用私有目录，并返回文件路径
+     */
+    private String copyImageFromDrawableToInternalStorage(int resourceId) {
+        String fileName = "sample_image_" + resourceId + ".png";
+        File file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), fileName);
+
+        try {
+            // 获取 Drawable 并转换为 BitmapDrawable
+            android.graphics.drawable.Drawable drawable = ContextCompat.getDrawable(this, resourceId);
+            if (drawable instanceof android.graphics.drawable.BitmapDrawable) {
+                android.graphics.Bitmap bitmap = ((android.graphics.drawable.BitmapDrawable) drawable).getBitmap();
+                
+                // 将 Bitmap 保存到文件
+                try (FileOutputStream fos = new FileOutputStream(file)) {
+                    bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, fos);
+                }
+            } else {
+                // 如果不是 BitmapDrawable（如 VectorDrawable），使用 Canvas 绘制到 bitmap
+                int width = drawable.getIntrinsicWidth() > 0 ? drawable.getIntrinsicWidth() : 100;
+                int height = drawable.getIntrinsicHeight() > 0 ? drawable.getIntrinsicHeight() : 100;
+                android.graphics.Bitmap bitmap = android.graphics.Bitmap.createBitmap(width, height, android.graphics.Bitmap.Config.ARGB_8888);
+                android.graphics.Canvas canvas = new android.graphics.Canvas(bitmap);
+                drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight());
+                drawable.draw(canvas);
+                
+                // 将 Bitmap 保存到文件
+                try (FileOutputStream fos = new FileOutputStream(file)) {
+                    bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, fos);
+                }
+            }
+
+            return file.getAbsolutePath();
+
+        } catch (Exception e) {
+            Log.e(TAG, "Failed to copy image from drawable", e);
+            return "";
+        }
+    }
+    
+    public ReviewCardFragmentAdapter getAdapter() {
+        return adapter;
+    }
+    
+    public Word getCurrentWord() {
+        return currentWord;
+    }
+    
+    public static WordViewModel getWordViewModel() {
+        return wordViewModel;
     }
 }

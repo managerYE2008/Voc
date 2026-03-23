@@ -28,6 +28,8 @@ public interface WordDao {
     
     @Query("SELECT * FROM word")
     LiveData<List<Word>> getAllWordsLive();
+
+
     
     @Query("SELECT * FROM word WHERE last_review_time < :time Order by last_review_time ASC")
     LiveData<List<Word>> getWordsDueForReviewLive(long time);
@@ -47,5 +49,7 @@ public interface WordDao {
 
     @Query("Select * from word where text like '%' || :keyword || '%'")
     LiveData<List<Word>> search(String keyword);
+
+
     
 }

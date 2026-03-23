@@ -23,6 +23,10 @@
         <activity
             android:name=".ui.activity.CardReviewActivity"
             android:exported="true" />
+        <activity
+            android:name=".ui.activity.EditWordActivity"
+            android:exported="true" />
+
         <meta-data
             android:name="preloaded_fonts"
             android:resource="@array/preloaded_fonts" />

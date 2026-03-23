@@ -1,6 +1,5 @@
 package com.example.volcabularycards.ui.adapter;
 
-import android.os.Build;
 import android.view.View;
 
 import androidx.annotation.NonNull;
@@ -32,7 +31,7 @@ public class CardPageTransformer implements ViewPager2.PageTransformer {
     public void transformPage(@NonNull View page, float position) {
         notifyFragmentOfPositionChange(page, position);
 
-        View cardView = page.findViewById(R.id.review_card_view);
+        View cardView = page.findViewById(R.id.edit_word_view);
         View frontCard = page.findViewById(R.id.card_front);
         View backCard = page.findViewById(R.id.card_back);
         

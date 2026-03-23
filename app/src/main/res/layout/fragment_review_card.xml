@@ -8,7 +8,7 @@
 
     <androidx.cardview.widget.CardView xmlns:android="http://schemas.android.com/apk/res/android"
         xmlns:app="http://schemas.android.com/apk/res-auto"
-        android:id="@+id/review_card_view"
+        android:id="@+id/edit_word_view"
         android:layout_width="300dp"
         android:layout_height="450dp"
         android:layout_gravity="center"
