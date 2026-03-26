@@ -1,39 +1,27 @@
 package com.example.volcabularycards.ui.activity;
 
-import android.content.Context;
 import android.os.Environment;
 import androidx.core.content.ContextCompat;
 import java.io.File;
 import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 
 import android.content.Intent;
 import android.os.Bundle;
-import android.os.Environment;
 
 import android.util.Log;
 import android.widget.Button;
 
 import androidx.appcompat.app.AppCompatActivity;
-import androidx.core.content.ContextCompat;
-import androidx.fragment.app.Fragment;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModelProvider;
-import androidx.recyclerview.widget.RecyclerView;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.volcabularycards.R;
 import com.example.volcabularycards.data.Word;
 import com.example.volcabularycards.ui.adapter.CardPageTransformer;
 import com.example.volcabularycards.ui.adapter.ReviewCardFragmentAdapter;
-import com.example.volcabularycards.ui.fragment.ReviewCardFragment;
 import com.example.volcabularycards.ui.viewmodel.WordViewModel;
 
-import java.io.File;
-import java.io.FileOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
 import java.util.ArrayList;
 import java.util.List;
 
@@ -189,7 +177,7 @@ public class CardReviewActivity extends AppCompatActivity {
         word0.setAnnotation("不是woc是Voc");
 
         // 复制 drawable 资源到内部存储并获取路径
-        String imagePath = copyImageFromDrawableToInternalStorage(R.drawable.author);
+        String imagePath = copyImageFromDrawableToInternalStorage(R.drawable.the_creator);
         word0.setImagePath(imagePath);
 
         sampleWords.add(word0);

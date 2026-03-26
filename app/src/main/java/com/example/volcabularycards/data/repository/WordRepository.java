@@ -163,6 +163,19 @@ public class WordRepository {
         }
         
         return result;
+
+
+    }
+
+    public LiveData<List<Word>> getReviewWordsLive(){
+        return wordDao.getReviewWordsLive();
+
+
+    }
+
+    public List<Word> getReviewWords(){
+        return wordDao.getReviewWords();
+
     }
     
     // ==================== 复杂逻辑预留方法 ====================

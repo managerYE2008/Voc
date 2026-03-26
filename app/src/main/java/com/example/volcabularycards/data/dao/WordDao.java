@@ -50,6 +50,11 @@ public interface WordDao {
     @Query("Select * from word where text like '%' || :keyword || '%'")
     LiveData<List<Word>> search(String keyword);
 
+    @Query("Select * from word where mastery_level>0 and mastery_level<1000 Order by last_review_time ASC")
+    LiveData<List<Word>> getReviewWordsLive();
+
+    @Query("Select * from word where mastery_level>0 and mastery_level<1000 Order by last_review_time ASC")
+    List<Word> getReviewWords();
 
     
 }

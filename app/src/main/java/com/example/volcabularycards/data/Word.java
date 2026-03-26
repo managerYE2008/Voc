@@ -22,6 +22,11 @@ public class Word {
 
     @ColumnInfo(name="mastery_level",index=true,defaultValue = "0")
     private int masteryLevel;
+    //1~10000 means the word is in the process of learning
+    //10000 means the word is learned
+    //0 means the word is not learned
+    //this value is used to calculate the S value in the Ebbinghaus Forgetting Curve
+
 
     @ColumnInfo(name="annotation")
     private String annotation;
