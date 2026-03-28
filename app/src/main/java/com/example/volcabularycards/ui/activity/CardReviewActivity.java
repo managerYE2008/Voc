@@ -105,7 +105,7 @@ public class CardReviewActivity extends AppCompatActivity {
         // 观察所有单词的变化来更新 UI
         wordViewModel.getAllWords().observe(this, words -> {
             int count = words != null ? words.size() : 0;
-            Log.d(TAG, "Words changed, count: " + count);
+            Log.d(TAG, "All words count: " + count);
             
             if (count > 0) {
                 // 将 List<Word> 转换为 List<LiveData<Word>>

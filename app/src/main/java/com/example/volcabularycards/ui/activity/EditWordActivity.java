@@ -85,20 +85,20 @@ public class EditWordActivity extends AppCompatActivity {
                 currentWord = new Word(newText, newMeaning);
                 currentWord.setId(wordId);
             }
-            // 更新Word对象
+            // 更新 Word 对象
             if (currentWord != null && !newText.isEmpty()) {
                 currentWord.setText(newText);
                 currentWord.setMeaning(newMeaning);
                 currentWord.setAnnotation(newAnnotation);
                 currentWord.setImagePath(imagePath); // 更新图片路径
 
-                // 通过ViewModelProvider获取ViewModel实例，确保正确性
+                // 通过 ViewModelProvider 获取 ViewModel 实例，确保正确性
                 WordViewModel wordViewModel = new ViewModelProvider(this).get(WordViewModel.class);
                 wordViewModel.update(currentWord);
             }
 
-            // 返回上一个Activity
-            setResult(RESULT_OK); // 添加结果码，通知父Activity数据已更改
+            // 返回上一个 Activity
+            setResult(RESULT_OK); // 添加结果码，通知父 Activity 数据已更改
             finish();
         });
     }

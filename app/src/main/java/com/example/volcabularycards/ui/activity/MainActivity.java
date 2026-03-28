@@ -24,10 +24,21 @@ public class MainActivity extends AppCompatActivity {
             // 跳转到单词卡复习界面
             startCardActivity();
         });
+
+        Button btnImport = findViewById(R.id.btn_import_excel);
+        btnImport.setOnClickListener(v -> {
+            // 跳转到 Excel 导入界面
+            startImportActivity();
+        });
     }
 
     private void startCardActivity() {
         Intent intent=new Intent(this, CardReviewActivity.class);
         startActivity( intent);
+    }
+
+    private void startImportActivity() {
+        Intent intent = new Intent(this, ExcelWordAddActivity.class);
+        startActivity(intent);
     }
 }
