@@ -102,17 +102,19 @@ public class SelectWordsActivity extends AppCompatActivity {
                 tvEmptyMessage.setVisibility(View.GONE);
                 viewPager.setVisibility(View.VISIBLE);
             } else {
-                int totalCount = wordViewModel.getTotalCount();
-                Log.d(TAG, "No not-learned words found. Total count: " + totalCount);
-                
-                if (totalCount == 0) {
-                    Log.d(TAG, "Database is empty, adding sample words...");
-                    addSampleWords();
-                } else {
-                    Log.d(TAG, "Database has words but no not-learned words. Showing empty view.");
-                    tvEmptyMessage.setVisibility(View.VISIBLE);
-                    viewPager.setVisibility(View.GONE);
-                }
+                // 使用 LiveData 观察总单词数，避免在主线程访问数据库
+                wordViewModel.getTotalCountLive().observe(SelectWordsActivity.this, totalCount -> {
+                    Log.d(TAG, "No not-learned words found. Total count from LiveData: " + totalCount);
+                    
+                    if (totalCount == 0 || totalCount == null) {
+                        Log.d(TAG, "Database is empty, adding sample words...");
+                        addSampleWords();
+                    } else if(!hasInitializedList){
+                        Log.d(TAG, "Database has words but no not-learned words. Showing empty view.");
+                        tvEmptyMessage.setVisibility(View.VISIBLE);
+                        viewPager.setVisibility(View.GONE);
+                    }
+                });
             }
         });
 

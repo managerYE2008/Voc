@@ -31,6 +31,18 @@ public class WordViewModel extends AndroidViewModel {
 
         
         // 观察所有单词变化，自动更新总数
+        allWords.observeForever(words -> {
+            int count = words != null ? words.size() : 0;
+            totalCount.postValue(count);
+            Log.d(TAG, "Total count updated: " + count);
+        });
+        
+        // 初始化时获取一次总数
+        executorService.execute(() -> {
+            int count = repository.getTotalCount();
+            totalCount.postValue(count);
+            Log.d(TAG, "Initial total count: " + count);
+        });
 
     }
     
@@ -106,7 +118,9 @@ public class WordViewModel extends AndroidViewModel {
         executorService.execute(() -> {
             int count = repository.getTotalCount();
             totalCount.postValue(count);
+            Log.d(TAG, "getTotalCount: " + count);
         });
+        Log.d(TAG, "returning getTotalCount: " + totalCount.getValue());
         if(totalCount.getValue()==null) return 0;
         else return totalCount.getValue();
 
