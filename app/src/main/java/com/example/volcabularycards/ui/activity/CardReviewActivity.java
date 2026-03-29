@@ -9,7 +9,10 @@ import android.content.Intent;
 import android.os.Bundle;
 
 import android.util.Log;
+import android.view.View;
 import android.widget.Button;
+import android.widget.TextView;
+import android.widget.TextView;
 
 import androidx.appcompat.app.AppCompatActivity;
 import androidx.lifecycle.LiveData;
@@ -32,12 +35,13 @@ public class CardReviewActivity extends AppCompatActivity {
     private static WordViewModel wordViewModel;
     private ReviewCardFragmentAdapter adapter;
     private ViewPager2 viewPager;
+    private TextView tvEmptyMessage;
     private int lastPosition = 0;
     private Word currentWord;
 
-    // 添加按钮引用
     private Button btnQuit;
     private Button btnEdit;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -47,6 +51,7 @@ public class CardReviewActivity extends AppCompatActivity {
         wordViewModel = new ViewModelProvider(this).get(WordViewModel.class);
         
         viewPager = findViewById(R.id.viewPager);
+        tvEmptyMessage = findViewById(R.id.tv_empty_message);
         
         adapter = new ReviewCardFragmentAdapter(getSupportFragmentManager(), getLifecycle());
         viewPager.setAdapter(adapter);
@@ -63,7 +68,7 @@ public class CardReviewActivity extends AppCompatActivity {
 
         // 设置 Quit 按钮点击事件：返回 MainActivity
         btnQuit.setOnClickListener(v -> {
-            finish(); // 结束当前 Activity，返回上一个界面
+            finish();
         });
 
         // 设置 Edit 按钮点击事件：跳转到 EditWordActivity
@@ -101,13 +106,19 @@ public class CardReviewActivity extends AppCompatActivity {
         });
 
         Log.d(TAG, "ViewPager initialized,adapter created");
+        
+
 
         // 观察所有单词的变化来更新 UI
-        wordViewModel.getAllWords().observe(this, words -> {
+        wordViewModel.getReviewWords().observe(this, words -> {
             int count = words != null ? words.size() : 0;
             Log.d(TAG, "All words count: " + count);
             
             if (count > 0) {
+                // 隐藏空状态提示
+                tvEmptyMessage.setVisibility(View.GONE);
+                viewPager.setVisibility(View.VISIBLE);
+                
                 // 将 List<Word> 转换为 List<LiveData<Word>>
                 List<LiveData<Word>> wordLiveList = new ArrayList<>();
                 for (Word word : words) {
@@ -143,9 +154,14 @@ public class CardReviewActivity extends AppCompatActivity {
                         Log.d(TAG, "Initial word at position " + currentPosition + ": " + (word != null ? word.getText() : "null"));
                     });
                 }
-            } else {
-                Log.d(TAG, "No words found, adding sample words...");
-                addSampleWords();
+            } else{
+                if(wordViewModel.getTotalCount()==0){
+                    Log.d(TAG, "No words found, adding sample words...");
+                    addSampleWords();
+                }
+                else Log.d(TAG, "No words found, but total count is " + wordViewModel.getTotalCount());
+                tvEmptyMessage.setVisibility(View.VISIBLE);
+                viewPager.setVisibility(View.GONE);
             }
         });
     }
@@ -174,7 +190,8 @@ public class CardReviewActivity extends AppCompatActivity {
         Word word0 = new Word();
         word0.setText("Voc");
         word0.setMeaning("全世界最好的应用");
-        word0.setAnnotation("不是woc是Voc");
+        word0.setAnnotation("不是 woc 是 Voc");
+        word0.setLearning(true);
 
         // 复制 drawable 资源到内部存储并获取路径
         String imagePath = copyImageFromDrawableToInternalStorage(R.drawable.the_creator);
@@ -192,17 +209,17 @@ public class CardReviewActivity extends AppCompatActivity {
         word2.setText("banana");
         word2.setMeaning("香蕉");
         sampleWords.add(word2);
-        
+
         Word word3 = new Word();
         word3.setText("orange");
         word3.setMeaning("橙子");
         sampleWords.add(word3);
-        
+
         Word word4 = new Word();
         word4.setText("computer");
         word4.setMeaning("电脑");
         sampleWords.add(word4);
-        
+
         Word word5 = new Word();
         word5.setText("language");
         word5.setMeaning("语言");
@@ -232,7 +249,7 @@ public class CardReviewActivity extends AppCompatActivity {
         word10.setText("tree");
         word10.setMeaning("树");
         sampleWords.add(word10);
-        
+
         wordViewModel.insertAll(sampleWords);
         Log.d(TAG, "Sample words inserted, count: " + sampleWords.size());
     }

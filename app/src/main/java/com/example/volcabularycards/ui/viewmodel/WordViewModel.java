@@ -119,4 +119,20 @@ public class WordViewModel extends AndroidViewModel {
     public List<LiveData<Word>> getAllWordsListLive(){
         return repository.getAllWordsListLive();
     }
+
+    public LiveData<List<Word>> getNotLearningWords(){
+        return repository.getReviewWordsLive();
+    }
+
+    public LiveData<List<Word>> getReviewWords(){
+        return repository.getReviewWordsLive();
+    }
+
+    public LiveData<List<Word>> getNotLearningWordsLive(){
+        return repository.getNotLearningWordsLive();
+    }
+
+    public LiveData<List<Word>> getNotLearnedWordsLive(){
+        return repository.getNotLearnedWordsLive();
+    }
 }

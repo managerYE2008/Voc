@@ -11,7 +11,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.example.volcabularycards.data.dao.WordDao;
 
-@Database(entities = {Word.class}, version = 2, exportSchema = false)
+@Database(entities = {Word.class}, version = 3, exportSchema = false)
 public abstract class WordDatabase extends RoomDatabase {
 
     private static volatile WordDatabase INSTANCE;
@@ -24,6 +24,17 @@ public abstract class WordDatabase extends RoomDatabase {
         public void migrate(SupportSQLiteDatabase database) {
             database.execSQL("ALTER TABLE word ADD COLUMN annotation TEXT");
             database.execSQL("ALTER TABLE word ADD COLUMN image_path TEXT");
+        }
+    };
+
+    private static final Migration MIGRATION_2_3 = new Migration(2, 3) {
+        @Override
+        public void migrate(SupportSQLiteDatabase database) {
+            // 添加 is_learning 字段，默认为 0 (false)
+            database.execSQL("ALTER TABLE word ADD COLUMN is_learning INTEGER NOT NULL DEFAULT 0");
+            
+            // 为 is_learning 字段添加索引（如果需要快速查询）
+            database.execSQL("CREATE INDEX IF NOT EXISTS index_word_is_learning ON word(is_learning)");
         }
     };
 
@@ -40,7 +51,7 @@ public abstract class WordDatabase extends RoomDatabase {
                             context.getApplicationContext(),
                             WordDatabase.class,
                             DATABASE_NAME
-                    ).addMigrations(MIGRATION_1_2)
+                    ).addMigrations(MIGRATION_1_2, MIGRATION_2_3)
                      .build();
                 }
             }

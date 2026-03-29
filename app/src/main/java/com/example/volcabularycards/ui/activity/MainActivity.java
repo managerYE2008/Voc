@@ -30,6 +30,12 @@ public class MainActivity extends AppCompatActivity {
             // 跳转到 Excel 导入界面
             startImportActivity();
         });
+
+        Button btnSelectWords = findViewById(R.id.btn_select_words);
+        btnSelectWords.setOnClickListener(v -> {
+            // 跳转到选择单词界面
+            startSelectWordsActivity();
+        });
     }
 
     private void startCardActivity() {
@@ -39,6 +45,11 @@ public class MainActivity extends AppCompatActivity {
 
     private void startImportActivity() {
         Intent intent = new Intent(this, ExcelWordAddActivity.class);
+        startActivity(intent);
+    }
+    
+    private void startSelectWordsActivity() {
+        Intent intent = new Intent(this, SelectWordsActivity.class);
         startActivity(intent);
     }
 }

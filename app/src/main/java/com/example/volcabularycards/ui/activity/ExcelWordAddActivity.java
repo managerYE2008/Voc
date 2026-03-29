@@ -375,7 +375,8 @@ public class ExcelWordAddActivity extends AppCompatActivity {
 
     private void insertWordsInBatch(List<Word> words) {
         WordDatabase database = WordDatabase.getInstance(this);
-        database.wordDao().insertAll(words);
+        wordViewModel = new ViewModelProvider(this).get(WordViewModel.class);
+        wordViewModel.insertAll(words);
     }
 
     private String getCellValue(Cell cell) {

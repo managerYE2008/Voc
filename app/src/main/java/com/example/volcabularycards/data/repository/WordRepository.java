@@ -177,7 +177,17 @@ public class WordRepository {
         return wordDao.getReviewWords();
 
     }
-    
+
+    public LiveData<List<Word>> getNotLearningWordsLive(){
+        return wordDao.getNotLearningWordsLive();
+
+
+    }
+    public LiveData<List<Word>> getNotLearnedWordsLive(){
+        return wordDao.getNotLearnedWordsLive();
+    }
+
+
     // ==================== 复杂逻辑预留方法 ====================
     // 你可以在这里添加更复杂的业务逻辑方法
     

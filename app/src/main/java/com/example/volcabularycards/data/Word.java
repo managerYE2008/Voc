@@ -28,6 +28,9 @@ public class Word {
     //this value is used to calculate the S value in the Ebbinghaus Forgetting Curve
 
 
+    @ColumnInfo(name="is_learning",defaultValue = "0")
+    boolean isLearning;
+    
     @ColumnInfo(name="annotation")
     private String annotation;
 
@@ -84,6 +87,17 @@ public class Word {
 
     public void setMasteryLevel(int masteryLevel) {
         this.masteryLevel = masteryLevel;
+    }
+
+    public boolean isLearning() {
+        return isLearning;
+    }
+
+    public void setLearning(boolean learning) {
+        if(learning&&masteryLevel==0){
+            masteryLevel=1;
+        }
+        isLearning = learning;
     }
 
     public String getAnnotation() {

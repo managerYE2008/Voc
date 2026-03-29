@@ -10,7 +10,7 @@
         android:id="@+id/tv_empty_message"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="没有可供复习的单词"
+        android:text="没有可供学习的单词"
         android:textSize="20sp"
         android:textColor="@android:color/darker_gray"
         android:visibility="gone"
@@ -20,7 +20,7 @@
         app:layout_constraintTop_toTopOf="parent" />
 
     <Button
-        android:id="@+id/btn_quit"
+        android:id="@+id/btn_quit_word_select"
         android:layout_width="107dp"
         android:layout_height="55dp"
         android:layout_marginStart="24dp"
@@ -32,23 +32,6 @@
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintHorizontal_bias="0.0"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toBottomOf="@+id/viewPager"
-        app:layout_constraintVertical_bias="1.0" />
-
-    <Button
-        android:id="@+id/btn_edit"
-        android:layout_width="107dp"
-        android:layout_height="55dp"
-        android:layout_marginEnd="24dp"
-        android:layout_marginBottom="16dp"
-        android:text="edit"
-        android:textSize="20sp"
-        android:textStyle="italic"
-        android:translationZ="10sp"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toBottomOf="@+id/viewPager"
         app:layout_constraintVertical_bias="1.0" />
