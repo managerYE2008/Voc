@@ -155,13 +155,17 @@ public class CardReviewActivity extends AppCompatActivity {
                     });
                 }
             } else{
-                if(wordViewModel.getTotalCount()==0){
-                    Log.d(TAG, "No words found, adding sample words...");
-                    addSampleWords();
-                }
-                else Log.d(TAG, "No words found, but total count is " + wordViewModel.getTotalCount());
-                tvEmptyMessage.setVisibility(View.VISIBLE);
-                viewPager.setVisibility(View.GONE);
+                // 使用 LiveData 观察总单词数，避免在主线程访问数据库
+                wordViewModel.getTotalCountLive().observe(CardReviewActivity.this, totalCount -> {
+                    if (totalCount == 0 || totalCount == null) {
+                        Log.d(TAG, "No words found, adding sample words...");
+                        addSampleWords();
+                    } else {
+                        Log.d(TAG, "No words found, but total count is " + totalCount);
+                        tvEmptyMessage.setVisibility(View.VISIBLE);
+                        viewPager.setVisibility(View.GONE);
+                    }
+                });
             }
         });
     }

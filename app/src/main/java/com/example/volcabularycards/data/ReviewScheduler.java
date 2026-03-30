@@ -9,6 +9,18 @@ import com.example.volcabularycards.data.repository.WordRepository;
 import java.util.ArrayList;
 import java.util.List;
 
+
+//Sₙ = Sₙ₋₁ × [1 + k × D × e^(-b × |t - t_opt|/t_opt)]
+
+/**
+ * Sₙ：第 n 次复习后的记忆强度
+ * Sₙ₋₁：第 n-1 次复习后的记忆强度（初始值 S₀ 由首次学习效果决定）
+ * k：学习效率系数（通常 0.3-0.5，反映个体学习能力）
+ * D：复习强度（取值范围 [0, 1]，反映学习时长、专注度、测试难度等综合因素）
+ * b：间隔敏感系数（通常 2.0-3.0，反映对时间间隔的敏感度）
+ * t：实际复习间隔时间
+ * t_opt：最优复习间隔时间（根据目标记忆时长计算：t_opt ≈ 0.15 × T，其中 T 为希望保持记忆的总时长）
+ */
 public class ReviewScheduler {
     private static WordRepository repository;
 
@@ -21,7 +33,8 @@ public class ReviewScheduler {
     private static final double RetrievabilityFinal=0.9;
     private static final long remainingTime=50*DAY_IN_MILLIS;
     private static final long StabilityFinal=(long)(-(remainingTime)/Math.log(RetrievabilityFinal));
-    private static final double k=0.5;
+    private static final double k=0.4;
+    private static final double b=4.0;
 
 
 
@@ -75,7 +88,7 @@ public class ReviewScheduler {
         long timeNow = System.currentTimeMillis();
         WordInfo wordInfo=new WordInfo(word1,timeNow);
         long Stability=calculateStability(word1.getMasteryLevel());
-        Stability=(long)((double)Stability*(1+k/difficulty));
+        Stability=calculateNextStability(word1,timeNow,difficulty);
         word1.setMasteryLevel(setMasterLevel(Stability));
         word1.setLastReviewTime(timeNow);
         repository.update(word1);
@@ -84,7 +97,19 @@ public class ReviewScheduler {
 
 
     }
+    //Sₙ = Sₙ₋₁ × [1 + k × D × e^(-b × t/t_opt)]
 
+    private static long calculateNextStability(Word word, long timeNow, float difficulty){
+        long Stability;
+        Stability=calculateStability(word.getMasteryLevel());
+        double timePercentage=(double)(timeNow-word.getLastReviewTime()-calculateTOpt(word))/calculateTOpt(word);
+        //timePercentage is the percentage of time to the Optimal Review Time since last reviewed
+        //b/(timePercentage+1) is to make the exponential function return a smaller value when now is before the Optimal Review Time
+        //                      and to make the exponential function return a larger value when now is after the Optimal Review Time but still has a limited value of b
+        long result=(long)(Stability*(1+k*difficulty*Math.exp(b/(timePercentage+1))));
+        return result;
+
+    }
     //R=exp(-t/S)
     //S_n+1 = S_n * (1+k/D)
     //k=0.5
@@ -103,6 +128,14 @@ public class ReviewScheduler {
         return Stability;
 
     }
+
+    private static long calculateTOpt(Word word) {
+        long TOpt;
+        TOpt = -(long)(Math.log(0.9)*calculateStability(word.getMasteryLevel()));
+
+        return TOpt;
+    }
+
 
     private static float calculateRetrievability(Word word, long timeNow) {
         float Retrievability;
@@ -123,6 +156,7 @@ public class ReviewScheduler {
         public float Retrievability;
 
 
+
         public double importance;
 
         public WordInfo(Word word,long timeNow) {
@@ -131,6 +165,7 @@ public class ReviewScheduler {
             float RetrievabilityNext=calculateRetrievability(word,timeNow+DAY_IN_MILLIS);
             importance=Retrievability-RetrievabilityNext;
         }
+
 
     }
 
