@@ -52,8 +52,8 @@ public class ReviewScheduler {
         }
         List<Word> reviewWords=new ArrayList<>();
         wordInfos.sort((a, b) -> {
-            if (b.importance > a.importance) return 1;
-            if (b.importance < a.importance) return -1;
+            if (b.Retrievability > a.Retrievability) return 1;
+            if (b.Retrievability < a.Retrievability) return -1;
             return 0;
         });
         for(WordInfo wordInfo:wordInfos){
@@ -73,8 +73,8 @@ public class ReviewScheduler {
         }
         List<Word> reviewWords=new ArrayList<>();
         wordInfos.sort((a, b) -> {
-            if (b.importance > a.importance) return 1;
-            if (b.importance < a.importance) return -1;
+            if (b.Retrievability > a.Retrievability) return 1;
+            if (b.Retrievability < a.Retrievability) return -1;
             return 0;
         });
         for(int i=0;i<amount&&i<wordInfos.size();i++){
@@ -157,13 +157,12 @@ public class ReviewScheduler {
 
 
 
-        public double importance;
+
 
         public WordInfo(Word word,long timeNow) {
             this.word = word;
             Retrievability=calculateRetrievability(word,timeNow);
-            float RetrievabilityNext=calculateRetrievability(word,timeNow+DAY_IN_MILLIS);
-            importance=Retrievability-RetrievabilityNext;
+
         }
 
 
