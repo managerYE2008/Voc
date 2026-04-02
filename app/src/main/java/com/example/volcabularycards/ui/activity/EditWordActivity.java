@@ -4,8 +4,10 @@ import android.content.Intent;
 import android.net.Uri;
 import android.os.Bundle;
 import android.provider.MediaStore;
+import android.util.Log;
 import android.widget.Button;
 import android.widget.EditText;
+import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.graphics.BitmapFactory;
 
@@ -19,7 +21,13 @@ import com.example.volcabularycards.ui.viewmodel.WordViewModel;
 public class EditWordActivity extends AppCompatActivity {
 
     private static final int PICK_IMAGE_REQUEST = 1;
-    private String imagePath = null; // 保存选中的图片路径
+    private String imagePath = null;
+    private boolean isLearning = false;
+
+    private ImageButton btnIsLearning;
+    private Word currentWord;
+    private WordViewModel wordViewModel;
+    boolean isAddingWord=false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -30,29 +38,64 @@ public class EditWordActivity extends AppCompatActivity {
         EditText editTextMeaning = findViewById(R.id.edit_word_meaning);
         EditText editTextAnnotation = findViewById(R.id.edit_word_annotation);
         ImageView imageView = findViewById(R.id.edit_word_image);
+        btnIsLearning = findViewById(R.id.btn_is_learning);
 
-        // 添加按钮引用
         Button btnQuit = findViewById(R.id.btn_quit_edit);
         Button btnConfirm = findViewById(R.id.btn_confirm_edit);
 
-        // 从 Intent 中获取数据
+        wordViewModel = new ViewModelProvider(this).get(WordViewModel.class);
+
         Bundle bundle = getIntent().getExtras();
         if (bundle != null) {
-            String wordText = bundle.getString("word_text");
-            String wordMeaning = bundle.getString("word_meaning");
-            String wordAnnotation = bundle.getString("word_annotation");
-            imagePath = bundle.getString("image_path"); // 保留原路径
-            
-            android.util.Log.d("EditWordActivity", "Loaded word: id=" + bundle.getInt("word_id") + 
-                              ", text=" + wordText + 
-                              ", image_path=" + imagePath);
+            isAddingWord = bundle.getBoolean("is_adding_word");
+            if(!isAddingWord){
+                String wordText = bundle.getString("word_text");
+                String wordMeaning = bundle.getString("word_meaning");
+                String wordAnnotation = bundle.getString("word_annotation");
+                imagePath = bundle.getString("image_path");
+                int wordId = bundle.getInt("word_id");
 
-            if (wordText != null) editTextWord.setText(wordText);
-            if (wordMeaning != null) editTextMeaning.setText(wordMeaning);
-            if (wordAnnotation != null) editTextAnnotation.setText(wordAnnotation);
 
+                if (wordText != null) editTextWord.setText(wordText);
+                if (wordMeaning != null) editTextMeaning.setText(wordMeaning);
+                if (wordAnnotation != null) editTextAnnotation.setText(wordAnnotation);
+
+                wordViewModel.getWordById(wordId).observe(this, word -> {
+                    if (word != null) {
+                        currentWord = word;
+                        isLearning = word.isLearning();
+
+                        android.util.Log.d("EditWordActivity", "Loaded word: id=" + word.getId() +
+                                ", text=" + word.getText() +
+                                ", is_learning=" + isLearning);
+                        if(currentWord.getMasteryLevel()==0){
+                            currentWord.setLearning(true);
+                        }
+
+                        updateStarIcon();
+                    }
+                });
+            }
+            else{
+                android.util.Log.d("EditWordActivity", "Adding new word");
+                currentWord=new Word();
+                currentWord.setText(bundle.getString("word_text"));
+                currentWord.setLearning( true);
+                editTextWord.setText(currentWord.getText());
+                isLearning=true;
+                updateStarIcon();
+            }
 
         }
+
+        // 设置五角星按钮点击事件：切换 isLearning 状态
+        btnIsLearning.setOnClickListener(v -> {
+            if (currentWord != null) {
+                currentWord.setLearning(!currentWord.isLearning());
+                isLearning = currentWord.isLearning();
+                updateStarIcon();
+            }
+        });
 
         // 设置点击事件：点击 ImageView 打开图库
         imageView.setOnClickListener(v -> {
@@ -79,28 +122,34 @@ public class EditWordActivity extends AppCompatActivity {
             String newMeaning = editTextMeaning.getText().toString().trim();
             String newAnnotation = editTextAnnotation.getText().toString().trim();
 
-            Word currentWord=null;
-            if (bundle != null) {
-                int wordId = bundle.getInt("word_id");
-                currentWord = new Word(newText, newMeaning);
-                currentWord.setId(wordId);
-            }
-            // 更新 Word 对象
             if (currentWord != null && !newText.isEmpty()) {
                 currentWord.setText(newText);
                 currentWord.setMeaning(newMeaning);
+                if(newAnnotation.isEmpty()) {
+                    newAnnotation=null;
+                    Log.d("EditWordActivity", "Annotation is empty, clearing annotation for word " );
+                }
                 currentWord.setAnnotation(newAnnotation);
-                currentWord.setImagePath(imagePath); // 更新图片路径
+                currentWord.setImagePath(imagePath);
+                currentWord.setLearning(isLearning);
 
                 // 通过 ViewModelProvider 获取 ViewModel 实例，确保正确性
-                WordViewModel wordViewModel = new ViewModelProvider(this).get(WordViewModel.class);
-                wordViewModel.update(currentWord);
+                if(isAddingWord) wordViewModel.insert(currentWord);
+                else wordViewModel.update(currentWord);
             }
 
             // 返回上一个 Activity
-            setResult(RESULT_OK); // 添加结果码，通知父 Activity 数据已更改
+            setResult(RESULT_OK);
             finish();
         });
+    }
+
+    private void updateStarIcon() {
+        if (isLearning) {
+            btnIsLearning.setColorFilter(0xFFFFD700);
+        } else {
+            btnIsLearning.setColorFilter(getColor(android.R.color.darker_gray));
+        }
     }
 
     @Override

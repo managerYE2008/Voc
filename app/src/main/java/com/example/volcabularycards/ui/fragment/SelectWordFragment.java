@@ -136,7 +136,7 @@ public class SelectWordFragment extends Fragment {
             if (nonLiveWord.isLearning()) {
                 btnIsLearning.setColorFilter(0xFFFFD700); // 金色
             } else {
-                btnIsLearning.setColorFilter(ContextCompat.getColor(requireContext(), android.R.color.black));
+                btnIsLearning.setColorFilter(ContextCompat.getColor(requireContext(), android.R.color.darker_gray));
             }
         }
     }

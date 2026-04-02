@@ -34,7 +34,8 @@ public class ReviewScheduler {
     private static final long remainingTime=50*DAY_IN_MILLIS;
     private static final long StabilityFinal=(long)(-(remainingTime)/Math.log(RetrievabilityFinal));
     private static final double k=0.4;
-    private static final double b=4.0;
+    private static final double b_early=4.0;
+    private static final double b_late=0.2;
 
 
 
@@ -52,8 +53,8 @@ public class ReviewScheduler {
         }
         List<Word> reviewWords=new ArrayList<>();
         wordInfos.sort((a, b) -> {
-            if (b.Retrievability > a.Retrievability) return 1;
-            if (b.Retrievability < a.Retrievability) return -1;
+            if (b.VarForCmp > a.VarForCmp) return -1;
+            if (b.VarForCmp < a.VarForCmp) return 1;
             return 0;
         });
         for(WordInfo wordInfo:wordInfos){
@@ -73,8 +74,8 @@ public class ReviewScheduler {
         }
         List<Word> reviewWords=new ArrayList<>();
         wordInfos.sort((a, b) -> {
-            if (b.Retrievability > a.Retrievability) return 1;
-            if (b.Retrievability < a.Retrievability) return -1;
+            if (b.VarForCmp > a.VarForCmp) return -1;
+            if (b.VarForCmp < a.VarForCmp) return 1;
             return 0;
         });
         for(int i=0;i<amount&&i<wordInfos.size();i++){
@@ -86,8 +87,7 @@ public class ReviewScheduler {
     public static void WordReviewed(LiveData<Word> word,float difficulty) {
         Word word1=word.getValue();
         long timeNow = System.currentTimeMillis();
-        WordInfo wordInfo=new WordInfo(word1,timeNow);
-        long Stability=calculateStability(word1.getMasteryLevel());
+        long Stability;
         Stability=calculateNextStability(word1,timeNow,difficulty);
         word1.setMasteryLevel(setMasterLevel(Stability));
         word1.setLastReviewTime(timeNow);
@@ -102,11 +102,14 @@ public class ReviewScheduler {
     private static long calculateNextStability(Word word, long timeNow, float difficulty){
         long Stability;
         Stability=calculateStability(word.getMasteryLevel());
-        double timePercentage=(double)(timeNow-word.getLastReviewTime()-calculateTOpt(word))/calculateTOpt(word);
+        long timePast=timeNow-word.getLastReviewTime();
+        double timePercentage=(double)(timePast-calculateTOpt(word))/calculateTOpt(word);
         //timePercentage is the percentage of time to the Optimal Review Time since last reviewed
         //b/(timePercentage+1) is to make the exponential function return a smaller value when now is before the Optimal Review Time
         //                      and to make the exponential function return a larger value when now is after the Optimal Review Time but still has a limited value of b
-        long result=(long)(Stability*(1+k*difficulty*Math.exp(b/(timePercentage+1))));
+        double x=b_early*((-1.0f/(timePercentage+1))+1);
+        if(x>0) x=-(double)b_late*(timePercentage);
+        long result=(long)(Stability*(1+k*difficulty*Math.exp(x)));
         return result;
 
     }
@@ -139,7 +142,7 @@ public class ReviewScheduler {
 
     private static float calculateRetrievability(Word word, long timeNow) {
         float Retrievability;
-        Retrievability = (float)Math.exp(-(timeNow-word.getLastReviewTime())/calculateStability(word.getMasteryLevel()));
+        Retrievability = (float)Math.exp(-(double)(timeNow-word.getLastReviewTime())/calculateStability(word.getMasteryLevel()));
 
         return Retrievability;
     }
@@ -153,7 +156,10 @@ public class ReviewScheduler {
     }
     private static class WordInfo{
         public  Word word;
-        public float Retrievability;
+        //public float Retrievability;
+
+
+        public double VarForCmp;
 
 
 
@@ -161,7 +167,8 @@ public class ReviewScheduler {
 
         public WordInfo(Word word,long timeNow) {
             this.word = word;
-            Retrievability=calculateRetrievability(word,timeNow);
+            //Retrievability=calculateRetrievability(word,timeNow);
+            VarForCmp=(double)(timeNow-word.getLastReviewTime())/calculateStability(word.getMasteryLevel());//与Retrievability成负相关
 
         }
 

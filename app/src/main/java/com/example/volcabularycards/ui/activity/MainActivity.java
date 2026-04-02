@@ -36,6 +36,12 @@ public class MainActivity extends AppCompatActivity {
             // 跳转到选择单词界面
             startSelectWordsActivity();
         });
+
+        Button btnSearchWord = findViewById(R.id.btn_search_word);
+        btnSearchWord.setOnClickListener(v -> {
+            // 跳转到搜索单词界面
+            startSearchWordActivity();
+        });
     }
 
     private void startCardActivity() {
@@ -50,6 +56,11 @@ public class MainActivity extends AppCompatActivity {
     
     private void startSelectWordsActivity() {
         Intent intent = new Intent(this, SelectWordsActivity.class);
+        startActivity(intent);
+    }
+
+    private void startSearchWordActivity() {
+        Intent intent = new Intent(this, SearchWordActivity.class);
         startActivity(intent);
     }
 }

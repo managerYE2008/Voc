@@ -19,6 +19,8 @@ public class WordViewModel extends AndroidViewModel {
     private final MutableLiveData<Integer> totalCount = new MutableLiveData<>();
     private  ExecutorService executorService;
 
+    private boolean isEmpty;
+
     private static final String TAG = "CardReviewActivity_viewmodel";
     
     public WordViewModel(@NonNull Application application) {
@@ -129,6 +131,15 @@ public class WordViewModel extends AndroidViewModel {
     public LiveData<Integer> getTotalCountLive() {
         return totalCount;
     }
+    public boolean isEmpty() {
+        executorService.execute(() -> {
+            isEmpty = repository.isEmpty();
+            Log.d(TAG, "isEmpty: " + isEmpty);
+        });
+        return isEmpty;
+    }
+
+
 
     public List<LiveData<Word>> getAllWordsListLive(){
         return repository.getAllWordsListLive();

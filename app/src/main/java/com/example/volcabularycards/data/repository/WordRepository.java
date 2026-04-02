@@ -136,7 +136,11 @@ public class WordRepository {
     public LiveData<Integer> getTotalCountLive() {
         return totalCountLive;
     }
-    
+    public boolean isEmpty() {
+        return wordDao.isEmpty();
+    }
+
+
     // ==================== Synchronous Query Operations ====================
     
     /**

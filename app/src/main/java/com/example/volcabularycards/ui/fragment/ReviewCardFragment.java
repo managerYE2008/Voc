@@ -161,6 +161,9 @@ public class ReviewCardFragment extends Fragment {
         if (annotationTextView != null && word.getAnnotation() != null) {
             annotationTextView.setText(word.getAnnotation());
         }
+        else if(word.getAnnotation()==null){
+            annotationTextView.setText("sth random");
+        }
         if (word.getImagePath() != null && !word.getImagePath().isEmpty()) {
             setAnnotationImage(word.getImagePath());
         }

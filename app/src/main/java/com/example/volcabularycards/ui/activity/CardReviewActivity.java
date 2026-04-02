@@ -98,6 +98,7 @@ public class CardReviewActivity extends AppCompatActivity {
                 bundle.putString("word_meaning", currentWord.getMeaning());
                 bundle.putString("word_annotation", currentWord.getAnnotation());
                 bundle.putString("image_path", currentImagePath);
+                bundle.putBoolean("is_adding_word", false);
                 intent.putExtras(bundle);
                 startActivity(intent);
             } else {

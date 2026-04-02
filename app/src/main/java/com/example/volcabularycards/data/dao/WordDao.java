@@ -45,6 +45,11 @@ public interface WordDao {
 
     @Query("SELECT COUNT(*)")
     int getTotalCount();
+    
+    @Query("SELECT CASE WHEN COUNT(*) > 0 THEN 0 ELSE 1 END")
+    boolean isEmpty();
+
+
 
 
     @Query("Select * from word where text like '%' || :keyword || '%'")
