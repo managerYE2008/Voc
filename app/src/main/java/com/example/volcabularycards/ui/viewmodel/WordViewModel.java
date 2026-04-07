@@ -32,19 +32,7 @@ public class WordViewModel extends AndroidViewModel {
         allWords = repository.getAllWords();
 
         
-        // 观察所有单词变化，自动更新总数
-        allWords.observeForever(words -> {
-            int count = words != null ? words.size() : 0;
-            totalCount.postValue(count);
-            Log.d(TAG, "Total count updated: " + count);
-        });
-        
-        // 初始化时获取一次总数
-        executorService.execute(() -> {
-            int count = repository.getTotalCount();
-            totalCount.postValue(count);
-            Log.d(TAG, "Initial total count: " + count);
-        });
+
 
     }
     
@@ -94,7 +82,7 @@ public class WordViewModel extends AndroidViewModel {
     // ==================== 数据查询 ====================
     
     public LiveData<List<Word>> getAllWords() {
-        return allWords;
+        return repository.getAllWords();
     }
     
     public LiveData<Word> getWordById(int id) {
@@ -141,8 +129,16 @@ public class WordViewModel extends AndroidViewModel {
 
 
 
+
     public List<LiveData<Word>> getAllWordsListLive(){
         return repository.getAllWordsListLive();
+    }
+
+    public List<LiveData<Word>> getReviewWordsListLive(){
+        return repository.getReviewWordsListLive();
+    }
+    public LiveData<List<Word>> getReviewWordsLive(){
+        return repository.getReviewWordsLive();
     }
 
     public LiveData<List<Word>> getNotLearningWords(){

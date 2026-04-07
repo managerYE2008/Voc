@@ -6,6 +6,7 @@ import android.os.Handler;
 import android.os.Looper;
 import android.text.Editable;
 import android.text.TextWatcher;
+import android.util.Log;
 import android.view.View;
 import android.widget.AdapterView;
 import android.widget.ArrayAdapter;
@@ -38,6 +39,10 @@ import java.util.List;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
+/**
+ * TODO: Optimize this shit
+ * this shit is to big for me to handle without a century of time
+ */
 public class ExcelWordAddActivity extends AppCompatActivity {
 
     private static final String TAG = "ExcelWordAddActivity";
@@ -52,8 +57,6 @@ public class ExcelWordAddActivity extends AppCompatActivity {
     private Spinner spinnerMeaningColumn;
     private EditText etStartRow;
     private EditText etEndRow;
-    private ProgressBar progressBar;
-    private TextView tvProgress;
     private MaterialCardView cardPreview;
 
     private Uri fileUri;
@@ -89,8 +92,6 @@ public class ExcelWordAddActivity extends AppCompatActivity {
         spinnerMeaningColumn = findViewById(R.id.spinner_meaning_column);
         etStartRow = findViewById(R.id.et_start_row);
         etEndRow = findViewById(R.id.et_end_row);
-        progressBar = findViewById(R.id.progress_bar);
-        tvProgress = findViewById(R.id.tv_progress);
         cardPreview = findViewById(R.id.card_preview);
     }
 
@@ -271,6 +272,7 @@ public class ExcelWordAddActivity extends AppCompatActivity {
             Toast.makeText(this, "请先选择文件", Toast.LENGTH_SHORT).show();
             return;
         }
+        Log.d("ExcelWordsAddActivity", "btn pressed");
 
         int wordCol = spinnerWordColumn.getSelectedItemPosition();
         int meaningCol = spinnerMeaningColumn.getSelectedItemPosition();
@@ -286,27 +288,26 @@ public class ExcelWordAddActivity extends AppCompatActivity {
             Toast.makeText(this, "请输入有效的行号", Toast.LENGTH_SHORT).show();
             return;
         }
-
         importWordsFromExcel(wordCol, meaningCol, startRow, endRow);
     }
 
     private void importWordsFromExcel(int wordCol, int meaningCol, int startRow, int endRow) {
         btnImport.setEnabled(false);
-        progressBar.setVisibility(android.view.View.VISIBLE);
-        tvProgress.setVisibility(android.view.View.VISIBLE);
 
         executor.execute(() -> {
             int successCount = 0;
             int skipCount = 0;
             List<Word> batchToInsert = new ArrayList<>(BATCH_SIZE);
             int currentRow = 0;
+            Log.d("ExcelWordsAddActivity", "Importing words");
 
             try (InputStream inputStream = getContentResolver().openInputStream(fileUri);
                  XSSFWorkbook workbook = new XSSFWorkbook(inputStream)) {
                 
                 Sheet sheet = workbook.getSheetAt(0);
+                Log.d("ExcelWordsAddActivity", "Importing from sheet: " + sheet.getSheetName());
                 int lastRow = endRow == -1 ? sheet.getLastRowNum() + 1 : Math.min(endRow, sheet.getLastRowNum() + 1);
-                int totalToProcess = lastRow - startRow + 1;
+                Log.d("ExcelWordsAddActivity", "Total rows: " + lastRow);
 
                 for (int i = startRow - 1; i < lastRow; i++) {
                     Row row = sheet.getRow(i);
@@ -337,13 +338,7 @@ public class ExcelWordAddActivity extends AppCompatActivity {
                     int finalCurrent = currentRow;
                     int finalSuccess = successCount;
                     
-                    if (currentRow % 10 == 0) {
-                        mainHandler.post(() -> {
-                            int percent = Math.min(95, (finalCurrent * 100) / totalToProcess);
-                            progressBar.setProgress(percent);
-                            tvProgress.setText("已处理：" + finalCurrent + " (成功:" + finalSuccess + ")");
-                        });
-                    }
+
                 }
 
                 if (!batchToInsert.isEmpty()) {
@@ -353,8 +348,6 @@ public class ExcelWordAddActivity extends AppCompatActivity {
                 int finalSuccess = successCount;
                 int finalSkip = skipCount;
                 mainHandler.post(() -> {
-                    progressBar.setVisibility(android.view.View.GONE);
-                    tvProgress.setVisibility(android.view.View.GONE);
                     btnImport.setEnabled(true);
                     
                     String message = "导入完成！\n成功：" + finalSuccess + " 条\n跳过：" + finalSkip + " 条";
@@ -364,8 +357,6 @@ public class ExcelWordAddActivity extends AppCompatActivity {
 
             } catch (Exception e) {
                 mainHandler.post(() -> {
-                    progressBar.setVisibility(android.view.View.GONE);
-                    tvProgress.setVisibility(android.view.View.GONE);
                     btnImport.setEnabled(true);
                     Toast.makeText(this, "导入失败：" + e.getMessage(), Toast.LENGTH_LONG).show();
                 });
@@ -373,10 +364,12 @@ public class ExcelWordAddActivity extends AppCompatActivity {
         });
     }
 
+    long timestamp=0;
     private void insertWordsInBatch(List<Word> words) {
-        WordDatabase database = WordDatabase.getInstance(this);
-        wordViewModel = new ViewModelProvider(this).get(WordViewModel.class);
-        wordViewModel.insertAll(words);
+        wordViewModel.insertAll(new ArrayList<>(words));
+
+        Log.d("ExcelWordsAddActivity","导入："+words.size()+"条，耗时："+(System.currentTimeMillis()-timestamp)+"ms");
+        timestamp= System.currentTimeMillis();
     }
 
     private String getCellValue(Cell cell) {

@@ -49,20 +49,26 @@ public class EditWordActivity extends AppCompatActivity {
         if (bundle != null) {
             isAddingWord = bundle.getBoolean("is_adding_word");
             if(!isAddingWord){
-                String wordText = bundle.getString("word_text");
-                String wordMeaning = bundle.getString("word_meaning");
-                String wordAnnotation = bundle.getString("word_annotation");
-                imagePath = bundle.getString("image_path");
                 int wordId = bundle.getInt("word_id");
 
 
-                if (wordText != null) editTextWord.setText(wordText);
-                if (wordMeaning != null) editTextMeaning.setText(wordMeaning);
-                if (wordAnnotation != null) editTextAnnotation.setText(wordAnnotation);
+
+
+
 
                 wordViewModel.getWordById(wordId).observe(this, word -> {
                     if (word != null) {
                         currentWord = word;
+                        String wordText = word.getText();
+                        String wordMeaning = word.getMeaning();
+                        String wordAnnotation = word.getAnnotation();
+                        imagePath = word.getImagePath();
+
+
+                        if (wordText != null) editTextWord.setText(wordText);
+                        if (wordMeaning != null) editTextMeaning.setText(wordMeaning);
+                        if (wordAnnotation != null) editTextAnnotation.setText(wordAnnotation);
+
                         isLearning = word.isLearning();
 
                         android.util.Log.d("EditWordActivity", "Loaded word: id=" + word.getId() +

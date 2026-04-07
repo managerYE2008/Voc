@@ -2,6 +2,7 @@ package com.example.volcabularycards.data;
 
 
 import android.content.Context;
+import android.content.SharedPreferences;
 
 import androidx.room.Database;
 import androidx.room.Room;
@@ -16,6 +17,8 @@ public abstract class WordDatabase extends RoomDatabase {
 
     private static volatile WordDatabase INSTANCE;
     private static final String DATABASE_NAME = "word_database";
+    private static final String PREFS_NAME = "word_db_prefs";
+    private static final String KEY_IS_FIRST_TIME = "is_first_time";
 
     public abstract WordDao wordDao();
 
@@ -64,5 +67,15 @@ public abstract class WordDatabase extends RoomDatabase {
      */
     public static void destroyInstance() {
         INSTANCE = null;
+    }
+
+    public static boolean isFirstTime(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        return prefs.getBoolean(KEY_IS_FIRST_TIME, true);
+    }
+
+    public static void setIsFirstTime(Context context) {
+        SharedPreferences prefs = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE);
+        prefs.edit().putBoolean(KEY_IS_FIRST_TIME, false).apply();
     }
 }

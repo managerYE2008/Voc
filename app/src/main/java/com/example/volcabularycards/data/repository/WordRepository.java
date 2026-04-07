@@ -171,6 +171,19 @@ public class WordRepository {
 
     }
 
+    public List<LiveData<Word>> getReviewWordsListLive() {
+        List<LiveData<Word>> result = new java.util.ArrayList<>();
+        LiveData<List<Word>> reviewWords = getReviewWordsLive();
+
+        if (reviewWords.getValue() != null) {
+            for (Word word : reviewWords.getValue()) {
+                result.add(getWordById(word.getId()));
+            }
+        }
+
+        return result;
+    }
+
     public LiveData<List<Word>> getReviewWordsLive(){
         return wordDao.getReviewWordsLive();
 

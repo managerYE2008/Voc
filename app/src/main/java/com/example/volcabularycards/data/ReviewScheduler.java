@@ -34,7 +34,7 @@ public class ReviewScheduler {
     private static final long remainingTime=50*DAY_IN_MILLIS;
     private static final long StabilityFinal=(long)(-(remainingTime)/Math.log(RetrievabilityFinal));
     private static final double k=0.4;
-    private static final double b_early=4.0;
+    private static final double b_early=1.0;
     private static final double b_late=0.2;
 
 

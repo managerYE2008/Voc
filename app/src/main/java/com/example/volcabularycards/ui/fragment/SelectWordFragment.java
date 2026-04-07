@@ -105,8 +105,9 @@ public class SelectWordFragment extends Fragment {
                     Word currentWord = word.getValue();
                     boolean newIsLearning = !currentWord.isLearning();
                     currentWord.setLearning(newIsLearning);
+                    SelectWordsActivity activity = (SelectWordsActivity) getActivity();
                     
-                    SelectWordsActivity.getWordViewModel().update(currentWord);
+                    activity.getWordViewModel().update(currentWord);
 
                     
                     Log.d(TAG, "Learning status toggled for word: " + currentWord.getText() + ", new status: " + newIsLearning);
@@ -163,7 +164,8 @@ public class SelectWordFragment extends Fragment {
                 updatedWord.setLastReviewTime(currentWord.getLastReviewTime());
                 updatedWord.setAnnotation(currentWord.getAnnotation());
                 updatedWord.setImagePath(currentWord.getImagePath());
-                SelectWordsActivity.getWordViewModel().update(updatedWord);
+                SelectWordsActivity activity = (SelectWordsActivity) getActivity();
+                activity.getWordViewModel().update(updatedWord);
                 hasUpdatedMasteryLevel = true;
                 Log.d(TAG, "Updated masteryLevel for word: " + currentWord.getText());
             }
@@ -184,7 +186,8 @@ public class SelectWordFragment extends Fragment {
                 updatedWord.setLastReviewTime(currentWord.getLastReviewTime());
                 updatedWord.setAnnotation(currentWord.getAnnotation());
                 updatedWord.setImagePath(currentWord.getImagePath());
-                SelectWordsActivity.getWordViewModel().update(updatedWord);
+                SelectWordsActivity activity = (SelectWordsActivity) getActivity();
+                activity.getWordViewModel().update(updatedWord);
                 hasUpdatedMasteryLevel = true;
                 Log.d(TAG, "Auto-updated masteryLevel for first fragment: " + currentWord.getText());
             }

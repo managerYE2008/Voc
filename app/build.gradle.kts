@@ -14,8 +14,24 @@ android {
         versionName = "1.0"
 
         testInstrumentationRunner = "androidx.test.runner.AndroidJUnitRunner"
+        externalNativeBuild {
+            cmake {
+                cppFlags += "-std=c++11"
+                arguments += "-DANDROID_STL=c++_shared"
+            }
+        }
+        
+        ndk {
+            abiFilters += listOf("armeabi-v7a", "arm64-v8a", "x86", "x86_64")
+        }
     }
-
+    
+    externalNativeBuild {
+        cmake {
+            path = file("src/main/cpp/CMakeLists.txt")
+        }
+    }
+    
     buildTypes {
         release {
             isMinifyEnabled = false
@@ -47,7 +63,8 @@ dependencies {
     // 添加 Apache POI 用于解析 Excel
     implementation("org.apache.poi:poi-ooxml:5.2.3")
     implementation("org.apache.poi:poi:5.2.3")
-    
+
+
     testImplementation(libs.junit)
     androidTestImplementation(libs.ext.junit)
     androidTestImplementation(libs.espresso.core)
