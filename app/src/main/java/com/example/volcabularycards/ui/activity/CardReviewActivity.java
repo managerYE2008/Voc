@@ -16,6 +16,7 @@ import androidx.lifecycle.ViewModelProvider;
 import androidx.viewpager2.widget.ViewPager2;
 
 import com.example.volcabularycards.R;
+import com.example.volcabularycards.data.ReviewScheduler;
 import com.example.volcabularycards.data.Word;
 import com.example.volcabularycards.ui.adapter.CardPageTransformer;
 import com.example.volcabularycards.ui.adapter.ReviewCardFragmentAdapter;
@@ -41,6 +42,7 @@ public class CardReviewActivity extends AppCompatActivity {
     private Button btnQuit;
     private Button btnEdit;
     private ViewPager2.OnPageChangeCallback viewPagerCallback;
+    private boolean isInitialDataLoaded = false;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -49,6 +51,9 @@ public class CardReviewActivity extends AppCompatActivity {
 
         // 初始化 ViewModel
         wordViewModel = new ViewModelProvider(this).get(WordViewModel.class);
+
+        // 初始化 ReviewScheduler
+        ReviewScheduler.init(wordViewModel);
 
         // 绑定 View
         viewPager = findViewById(R.id.viewPager);
@@ -85,7 +90,25 @@ public class CardReviewActivity extends AppCompatActivity {
 
         // 【核心修复】只在这里注册一次 Observer
         // 这样无论数据怎么变，Observer 只有一个，不会内存泄漏
-        wordViewModel.getReviewWordsLive().observe(this, this::updateUI);
+        wordViewModel.getReviewWordsLive().observe(this, words->{
+            if(isInitialDataLoaded){
+                return;
+            }
+            words= ReviewScheduler.getReviewWords(words);
+            updateUI(words);
+            
+            if (words != null && !words.isEmpty()) {
+                LiveData<Word> firstWord = adapter.getWord(0);
+                if (firstWord != null && firstWord.getValue() != null) {
+                    ReviewScheduler.WordReviewed(firstWord, 0.5f);
+                    Log.d(TAG, "Reviewed first word: " + firstWord.getValue().getText());
+                }
+            }
+            
+            isInitialDataLoaded = true;
+            wordViewModel.getReviewWordsLive().removeObservers(this);
+
+        });
 
         // 注册 Pager 回调
         viewPagerCallback = new ViewPager2.OnPageChangeCallback() {
@@ -94,6 +117,7 @@ public class CardReviewActivity extends AppCompatActivity {
                 super.onPageSelected(position);
                 lastPosition = position;
                 Log.d(TAG, "Page changed to position: " + position);
+                ReviewScheduler.WordReviewed(adapter.getWord(position),0.05f);
             }
         };
         viewPager.registerOnPageChangeCallback(viewPagerCallback);

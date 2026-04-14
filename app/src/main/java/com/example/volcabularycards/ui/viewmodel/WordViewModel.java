@@ -16,7 +16,6 @@ import com.example.volcabularycards.data.repository.WordRepository;
 public class WordViewModel extends AndroidViewModel {
     private final WordRepository repository;
     private final LiveData<List<Word>> allWords;
-    private final MutableLiveData<Integer> totalCount = new MutableLiveData<>();
     private  ExecutorService executorService;
 
     private boolean isEmpty;
@@ -31,7 +30,8 @@ public class WordViewModel extends AndroidViewModel {
         repository = new WordRepository(application);
         allWords = repository.getAllWords();
 
-        
+
+
 
 
     }
@@ -103,22 +103,8 @@ public class WordViewModel extends AndroidViewModel {
         return repository.searchWords(keyword);
     }
     
-    public int getTotalCount() {
 
-        executorService.execute(() -> {
-            int count = repository.getTotalCount();
-            totalCount.postValue(count);
-            Log.d(TAG, "getTotalCount: " + count);
-        });
-        Log.d(TAG, "returning getTotalCount: " + totalCount.getValue());
-        if(totalCount.getValue()==null) return 0;
-        else return totalCount.getValue();
-
-    }
     
-    public LiveData<Integer> getTotalCountLive() {
-        return totalCount;
-    }
     public boolean isEmpty() {
         executorService.execute(() -> {
             isEmpty = repository.isEmpty();
@@ -156,4 +142,14 @@ public class WordViewModel extends AndroidViewModel {
     public LiveData<List<Word>> getNotLearnedWordsLive(){
         return repository.getNotLearnedWordsLive();
     }
+
+    public LiveData<List<Word>> getRandomReviewWordsLive(int limit){
+        return repository.getRandomReviewWordsLive(limit);
+    }
+    public List<Word> getRandomReviewWords(int limit){
+
+        return repository.getRandomReviewWords(limit);
+    }
+
+
 }

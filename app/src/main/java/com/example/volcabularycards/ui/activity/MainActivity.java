@@ -30,6 +30,7 @@ public class MainActivity extends AppCompatActivity {
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
+        Log.d("MainActivity", "onCreate called");
 
         Button btnStart = findViewById(R.id.btn_start);
         btnStart.setOnClickListener(v -> {
@@ -53,6 +54,11 @@ public class MainActivity extends AppCompatActivity {
         btnSearchWord.setOnClickListener(v -> {
             // 跳转到搜索单词界面
             startSearchWordActivity();
+        });
+
+        Button btnQuiz = findViewById(R.id.btn_quiz);
+        btnQuiz.setOnClickListener(v -> {
+            startQuizActivity();
         });
 
         WordDatabase wordDatabase = WordDatabase.getInstance(this);
@@ -190,6 +196,10 @@ public class MainActivity extends AppCompatActivity {
 
     private void startSearchWordActivity() {
         Intent intent = new Intent(this, SearchWordActivity.class);
+        startActivity(intent);
+    }
+    private void startQuizActivity() {
+        Intent intent = new Intent(this, QuizActivity.class);
         startActivity(intent);
     }
 }

@@ -204,6 +204,14 @@ public class WordRepository {
         return wordDao.getNotLearnedWordsLive();
     }
 
+    public LiveData<List<Word>> getRandomReviewWordsLive(int limit){
+        return wordDao.getRandomReviewWordsLive(limit);
+    }
+
+    public List<Word> getRandomReviewWords(int limit){
+        return wordDao.getRandomReviewWords(limit);
+    }
+
 
     // ==================== 复杂逻辑预留方法 ====================
     // 你可以在这里添加更复杂的业务逻辑方法

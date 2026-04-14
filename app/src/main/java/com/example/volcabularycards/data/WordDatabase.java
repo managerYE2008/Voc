@@ -12,7 +12,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.example.volcabularycards.data.dao.WordDao;
 
-@Database(entities = {Word.class}, version = 3, exportSchema = false)
+@Database(entities = {Word.class}, version = 4, exportSchema = false)
 public abstract class WordDatabase extends RoomDatabase {
 
     private static volatile WordDatabase INSTANCE;
@@ -36,7 +36,32 @@ public abstract class WordDatabase extends RoomDatabase {
             // 添加 is_learning 字段，默认为 0 (false)
             database.execSQL("ALTER TABLE word ADD COLUMN is_learning INTEGER NOT NULL DEFAULT 0");
             
-            // 为 is_learning 字段添加索引（如果需要快速查询）
+            database.execSQL("CREATE INDEX IF NOT EXISTS index_word_is_learning ON word(is_learning)");
+        }
+    };
+
+    private static final Migration MIGRATION_3_4 = new Migration(3, 4) {
+        @Override
+        public void migrate(SupportSQLiteDatabase database) {
+            database.execSQL("CREATE TABLE word_new (" +
+                    "id INTEGER PRIMARY KEY AUTOINCREMENT NOT NULL, " +
+                    "text TEXT, " +
+                    "meaning TEXT, " +
+                    "last_review_time INTEGER NOT NULL, " +
+                    "mastery_level REAL NOT NULL DEFAULT 0, " +
+                    "is_learning INTEGER NOT NULL DEFAULT 0, " +
+                    "annotation TEXT, " +
+                    "image_path TEXT)");
+            
+            database.execSQL("INSERT INTO word_new (id, text, meaning, last_review_time, mastery_level, is_learning, annotation, image_path) " +
+                    "SELECT id, text, meaning, IFNULL(last_review_time, 0), CAST(mastery_level AS REAL), IFNULL(is_learning, 0), annotation, image_path FROM word");
+            
+            database.execSQL("DROP TABLE word");
+            
+            database.execSQL("ALTER TABLE word_new RENAME TO word");
+            
+            database.execSQL("CREATE INDEX IF NOT EXISTS index_word_last_review_time ON word(last_review_time)");
+            database.execSQL("CREATE INDEX IF NOT EXISTS index_word_mastery_level ON word(mastery_level)");
             database.execSQL("CREATE INDEX IF NOT EXISTS index_word_is_learning ON word(is_learning)");
         }
     };
@@ -54,7 +79,7 @@ public abstract class WordDatabase extends RoomDatabase {
                             context.getApplicationContext(),
                             WordDatabase.class,
                             DATABASE_NAME
-                    ).addMigrations(MIGRATION_1_2, MIGRATION_2_3)
+                    ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
                      .build();
                 }
             }

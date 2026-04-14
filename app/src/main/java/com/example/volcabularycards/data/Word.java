@@ -21,7 +21,7 @@ public class Word {
     private long lastReviewTime;
 
     @ColumnInfo(name="mastery_level",index=true,defaultValue = "0")
-    private int masteryLevel;
+    private float masteryLevel;
     //1~10000 means the word is in the process of learning
     //10000 means the word is learned
     //0 means the word is not learned
@@ -81,11 +81,11 @@ public class Word {
         this.lastReviewTime = lastReviewTime;
     }
 
-    public int getMasteryLevel() {
+    public float getMasteryLevel() {
         return masteryLevel;
     }
 
-    public void setMasteryLevel(int masteryLevel) {
+    public void setMasteryLevel(float masteryLevel) {
         this.masteryLevel = masteryLevel;
     }
 
@@ -96,8 +96,10 @@ public class Word {
     public void setLearning(boolean learning) {
         if(learning&&masteryLevel==0){
             masteryLevel=1;
+            lastReviewTime=System.currentTimeMillis();
         }
         isLearning = learning;
+
     }
 
     public String getAnnotation() {
@@ -114,5 +116,36 @@ public class Word {
 
     public void setImagePath(String imagePath) {
         this.imagePath = imagePath;
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null || getClass() != obj.getClass()) return false;
+        
+        Word word = (Word) obj;
+        
+        if (id != word.id) return false;
+        if (lastReviewTime != word.lastReviewTime) return false;
+        if (Float.compare(word.masteryLevel, masteryLevel) != 0) return false;
+        if (isLearning != word.isLearning) return false;
+        
+        if (text != null ? !text.equals(word.text) : word.text != null) return false;
+        if (meaning != null ? !meaning.equals(word.meaning) : word.meaning != null) return false;
+        if (annotation != null ? !annotation.equals(word.annotation) : word.annotation != null) return false;
+        return imagePath != null ? imagePath.equals(word.imagePath) : word.imagePath == null;
+    }
+
+    @Override
+    public int hashCode() {
+        int result = id;
+        result = 31 * result + (text != null ? text.hashCode() : 0);
+        result = 31 * result + (meaning != null ? meaning.hashCode() : 0);
+        result = 31 * result + (int) (lastReviewTime ^ (lastReviewTime >>> 32));
+        result = 31 * result + Float.floatToIntBits(masteryLevel);
+        result = 31 * result + (isLearning ? 1 : 0);
+        result = 31 * result + (annotation != null ? annotation.hashCode() : 0);
+        result = 31 * result + (imagePath != null ? imagePath.hashCode() : 0);
+        return result;
     }
 }

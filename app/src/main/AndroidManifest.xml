@@ -35,6 +35,9 @@
         <activity
             android:name=".ui.activity.SearchWordActivity"
             android:exported="true" />
+        <activity
+            android:name=".ui.activity.QuizActivity"
+            android:exported="true" />
 
         <meta-data
             android:name="preloaded_fonts"

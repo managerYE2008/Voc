@@ -4,10 +4,11 @@ import android.util.Log;
 
 import androidx.lifecycle.LiveData;
 
-import com.example.volcabularycards.data.repository.WordRepository;
+import com.example.volcabularycards.ui.viewmodel.WordViewModel;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Random;
 
 
 //Sₙ = Sₙ₋₁ × [1 + k × D × e^(-b × |t - t_opt|/t_opt)]
@@ -22,7 +23,7 @@ import java.util.List;
  * t_opt：最优复习间隔时间（根据目标记忆时长计算：t_opt ≈ 0.15 × T，其中 T 为希望保持记忆的总时长）
  */
 public class ReviewScheduler {
-    private static WordRepository repository;
+    private static WordViewModel wordViewModel;
 
     private static final long DAY_IN_MILLIS = 24 * 60 * 60 * 1000;
     private static final long WEEK_IN_MILLIS = 7 * DAY_IN_MILLIS;
@@ -33,23 +34,42 @@ public class ReviewScheduler {
     private static final double RetrievabilityFinal=0.9;
     private static final long remainingTime=50*DAY_IN_MILLIS;
     private static final long StabilityFinal=(long)(-(remainingTime)/Math.log(RetrievabilityFinal));
-    private static final double k=0.4;
+    private static final double k=0.6;
     private static final double b_early=1.0;
-    private static final double b_late=0.2;
+    private static final double b_late=0.05;
 
 
 
-    public ReviewScheduler(WordRepository repository) {
-        ReviewScheduler.repository = repository;
+    public static void init(WordViewModel viewModel) {
+        ReviewScheduler.wordViewModel = viewModel;
     }
 
-    public static List<Word> getReviewWords() {
+    public static List<Word> getReviewWords(List<Word> allWords) {
+
+
+        
+        if (allWords == null || allWords.isEmpty()) {
+            Log.d("ReviewScheduler", "No words available for review");
+            return new ArrayList<>();
+        }
+        
+        Log.d("ReviewScheduler", "Total words to evaluate: " + allWords.size());
         long currentTime = System.currentTimeMillis();
-        List<Word> AllWords=repository.getReviewWords();
         List<WordInfo> wordInfos=new ArrayList<>();
-        for(Word word:AllWords){
+        for(Word word:allWords){
             WordInfo wordInfo=new WordInfo(word,currentTime);
             wordInfos.add(wordInfo);
+            /*Log.d("ReviewScheduler_Debug", String.format(
+                "Word: %s | Mastery: %d | LastReview: %d | TimeDiff: %d hours | Stability: %d | VarForCmp: %.4f",
+                word.getText(),
+                word.getMasteryLevel(),
+                word.getLastReviewTime(),
+                (currentTime - word.getLastReviewTime()) / (60 * 60 * 1000),
+                calculateStability(word.getMasteryLevel()),
+                wordInfo.VarForCmp
+            ));
+
+             */
         }
         List<Word> reviewWords=new ArrayList<>();
         wordInfos.sort((a, b) -> {
@@ -60,15 +80,21 @@ public class ReviewScheduler {
         for(WordInfo wordInfo:wordInfos){
             reviewWords.add(wordInfo.word);
         }
+        Log.d("ReviewScheduler", "Final review list size: " + reviewWords.size());
         return reviewWords;
 
 
     }
-    public static List<Word> getReviewWords(int amount){
+    public static List<Word> getReviewWords(List<Word> allWords,int amount){
+
+        
+        if (allWords == null || allWords.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
         long currentTime = System.currentTimeMillis();
-        List<Word> AllWords=repository.getReviewWords();
         List<WordInfo> wordInfos=new ArrayList<>();
-        for(Word word:AllWords){
+        for(Word word:allWords){
             WordInfo wordInfo=new WordInfo(word,currentTime);
             wordInfos.add(wordInfo);
         }
@@ -84,14 +110,36 @@ public class ReviewScheduler {
         return reviewWords;
     }
 
-    public static void WordReviewed(LiveData<Word> word,float difficulty) {
+
+    public static void WordReviewed(LiveData<Word> word, float difficulty) {
+        if (wordViewModel == null) {
+            Log.e("ReviewScheduler", "WordViewModel not initialized");
+            return;
+        }
+        
         Word word1=word.getValue();
+        if (word1 == null) {
+            Log.e("ReviewScheduler", "Word is null");
+            return;
+        }
+        
         long timeNow = System.currentTimeMillis();
+        long oldStability = calculateStability(word1.getMasteryLevel());
+        float oldMastery = word1.getMasteryLevel();
         long Stability;
         Stability=calculateNextStability(word1,timeNow,difficulty);
         word1.setMasteryLevel(setMasterLevel(Stability));
         word1.setLastReviewTime(timeNow);
-        repository.update(word1);
+        Log.d("ReviewScheduler_Update", String.format(
+            "Word: %s | Old Mastery: %.2f -> New: %.2f | Old Stability: %d -> New: %d | Difficulty: %.2f",
+            word1.getText(),
+            oldMastery,
+            word1.getMasteryLevel(),
+            oldStability,
+            Stability,
+            difficulty
+        ));
+        wordViewModel.update(word1);
         Log.d("ReviewScheduler", "WordReviewed: " + word1.getText() + " " + word1.getMasteryLevel());
 
 
@@ -104,14 +152,48 @@ public class ReviewScheduler {
         Stability=calculateStability(word.getMasteryLevel());
         long timePast=timeNow-word.getLastReviewTime();
         double timePercentage=(double)(timePast-calculateTOpt(word))/calculateTOpt(word);
-        //timePercentage is the percentage of time to the Optimal Review Time since last reviewed
-        //b/(timePercentage+1) is to make the exponential function return a smaller value when now is before the Optimal Review Time
-        //                      and to make the exponential function return a larger value when now is after the Optimal Review Time but still has a limited value of b
+        Log.d("ReviewScheduler_Calc", String.format(
+            "Word: %s | Stability: %d | TimePast: %d hrs | TOpt: %d hrs | TimePercentage: %.2f",
+            word.getText(),
+            Stability,
+            timePast / (60 * 60 * 1000),
+            calculateTOpt(word) / (60 * 60 * 1000),
+            timePercentage
+        ));
         double x=b_early*((-1.0f/(timePercentage+1))+1);
         if(x>0) x=-(double)b_late*(timePercentage);
+        Log.d("ReviewScheduler_Calc", String.format(
+            "Exponent x: %.4f | Difficulty: %.2f | Result: %d",
+            x, difficulty, (long)(Stability*(1+k*difficulty*Math.exp(x)))
+        ));
         long result=(long)(Stability*(1+k*difficulty*Math.exp(x)));
         return result;
 
+    }
+    public static List<Word> getDistractors(Word word,int  amount) {
+        if (wordViewModel == null) {
+            Log.e("ReviewScheduler", "WordViewModel not initialized");
+            return new ArrayList<>();
+        }
+
+        List<Word> similarWords = wordViewModel.getRandomReviewWords(amount);
+        
+        if (similarWords == null || similarWords.isEmpty()) {
+            return new ArrayList<>();
+        }
+        
+        if (similarWords.contains(word)) {
+            similarWords.remove(word);
+            Log.d("ReviewScheduler", "Removed word from similar words list");
+        } else if (similarWords.size() > amount) {
+            similarWords = similarWords.subList(0, amount);
+        }
+        else if(similarWords.size()<amount){
+            similarWords.addAll(wordViewModel.getRandomReviewWords(amount-similarWords.size()));
+        }
+        Log.d("ReviewScheduler", "Final similar words list size: " + similarWords.size());
+        
+        return similarWords;
     }
     //R=exp(-t/S)
     //S_n+1 = S_n * (1+k/D)
@@ -125,7 +207,7 @@ public class ReviewScheduler {
 
     //S=sqrt(masteryLevel)/100*StabilityFinal
 
-    private static long calculateStability(int masteryLevel) {
+    private static long calculateStability(float masteryLevel) {
         long Stability;
         Stability =(long)(Math.sqrt(masteryLevel)/100*StabilityFinal+1);
         return Stability;
@@ -148,9 +230,9 @@ public class ReviewScheduler {
     }
 
 
-    public static int setMasterLevel(long Stability){
-        int MasteryLevel;
-        MasteryLevel=(int)(Math.pow((double)Stability*100/StabilityFinal,2));
+    public static float setMasterLevel(long Stability){
+        float MasteryLevel;
+        MasteryLevel=(float)(Math.pow((double)Stability*100/StabilityFinal,2));
         return MasteryLevel;
 
     }

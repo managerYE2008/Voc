@@ -55,11 +55,17 @@ public interface WordDao {
     @Query("Select * from word where text like '%' || :keyword || '%'")
     LiveData<List<Word>> search(String keyword);
 
-    @Query("Select * from word where is_learning and mastery_level<1000 Order by last_review_time ASC")
+    @Query("Select * from word where is_learning and mastery_level<10000 Order by last_review_time ASC")
     LiveData<List<Word>> getReviewWordsLive();
 
-    @Query("Select * from word where is_learning and mastery_level<1000 Order by last_review_time ASC")
+    @Query("Select * from word where is_learning and mastery_level<10000 Order by last_review_time ASC")
     List<Word> getReviewWords();
+
+    @Query("Select * from word where is_learning and mastery_level<10000 Order by RANDOM() LIMIT :limit+1")
+    LiveData<List<Word>> getRandomReviewWordsLive(int limit);
+
+    @Query("Select * from word where is_learning and mastery_level<10000 Order by RANDOM() LIMIT :limit+1")
+    List<Word> getRandomReviewWords(int limit);
 
     @Query("Select * from word where not is_learning")
     LiveData<List<Word>> getNotLearningWordsLive();

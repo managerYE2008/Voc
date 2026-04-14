@@ -1,7 +1,5 @@
 package com.example.volcabularycards.ui.fragment;
 
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.os.Bundle;
 import android.util.Log;
 import android.view.LayoutInflater;
@@ -53,7 +51,7 @@ public class SelectWordFragment extends Fragment {
         Log.d(TAG, "onCreateView called");
 
         View cardFront = view.findViewById(R.id.select_word_card_front);
-        wordTextView=cardFront.findViewById(R.id.select_word_word);
+        wordTextView=cardFront.findViewById(R.id.word_en);
         meaningTextView=cardFront.findViewById(R.id.select_word_meaning);
         btnIsLearning = cardFront.findViewById(R.id.btn_is_learning);
         
@@ -128,6 +126,7 @@ public class SelectWordFragment extends Fragment {
         if (meaningTextView != null && nonLiveWord.getMeaning() != null) {
             meaningTextView.setText(nonLiveWord.getMeaning());
         }
+
     }
     
     private void updateLearningButton() {
