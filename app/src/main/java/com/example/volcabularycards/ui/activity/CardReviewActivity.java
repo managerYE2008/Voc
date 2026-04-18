@@ -39,7 +39,7 @@ public class CardReviewActivity extends AppCompatActivity {
     private TextView tvEmptyMessage;
     private int lastPosition = 0;
 
-    private Button btnQuit;
+
     private Button btnEdit;
     private ViewPager2.OnPageChangeCallback viewPagerCallback;
     private boolean isInitialDataLoaded = false;
@@ -68,11 +68,10 @@ public class CardReviewActivity extends AppCompatActivity {
         viewPager.setPageTransformer(new CardPageTransformer(viewPager));
 
         // 初始化按钮
-        btnQuit = findViewById(R.id.btn_quit);
         btnEdit = findViewById(R.id.btn_edit);
 
         // Quit 按钮
-        btnQuit.setOnClickListener(v -> finish());
+
 
         // Edit 按钮：实时获取当前单词
         btnEdit.setOnClickListener(v -> {
