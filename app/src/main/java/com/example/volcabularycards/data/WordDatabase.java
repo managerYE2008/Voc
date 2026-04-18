@@ -12,7 +12,7 @@ import androidx.sqlite.db.SupportSQLiteDatabase;
 
 import com.example.volcabularycards.data.dao.WordDao;
 
-@Database(entities = {Word.class}, version = 4, exportSchema = false)
+@Database(entities = {Word.class}, version = 5, exportSchema = false)
 public abstract class WordDatabase extends RoomDatabase {
 
     private static volatile WordDatabase INSTANCE;
@@ -66,6 +66,15 @@ public abstract class WordDatabase extends RoomDatabase {
         }
     };
 
+    private static final Migration MIGRATION_4_5 = new Migration(4, 5) {
+        @Override
+        public void migrate(SupportSQLiteDatabase database) {
+            database.execSQL("DROP INDEX IF EXISTS index_word_last_review_time");
+            database.execSQL("DROP INDEX IF EXISTS index_word_mastery_level");
+            database.execSQL("CREATE INDEX IF NOT EXISTS index_word_text ON word(text)");
+        }
+    };
+
     /**
      * 获取单例实例（线程安全）
      * @param context 应用上下文
@@ -79,7 +88,7 @@ public abstract class WordDatabase extends RoomDatabase {
                             context.getApplicationContext(),
                             WordDatabase.class,
                             DATABASE_NAME
-                    ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4)
+                    ).addMigrations(MIGRATION_1_2, MIGRATION_2_3, MIGRATION_3_4, MIGRATION_4_5)
                      .build();
                 }
             }

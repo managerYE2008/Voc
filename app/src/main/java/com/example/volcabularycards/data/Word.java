@@ -11,16 +11,16 @@ public class Word {
     @PrimaryKey(autoGenerate = true)
     private int id;
 
-    @ColumnInfo(name = "text")
+    @ColumnInfo(name = "text",index=true)
     private String text;
 
     @ColumnInfo(name="meaning")
     private String meaning;
 
-    @ColumnInfo(name="last_review_time",index=true)
+    @ColumnInfo(name="last_review_time")
     private long lastReviewTime;
 
-    @ColumnInfo(name="mastery_level",index=true,defaultValue = "0")
+    @ColumnInfo(name="mastery_level",defaultValue = "0")
     private float masteryLevel;
     //1~10000 means the word is in the process of learning
     //10000 means the word is learned

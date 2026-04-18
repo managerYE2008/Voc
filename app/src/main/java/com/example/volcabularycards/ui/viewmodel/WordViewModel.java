@@ -15,7 +15,6 @@ import com.example.volcabularycards.data.repository.WordRepository;
 
 public class WordViewModel extends AndroidViewModel {
     private final WordRepository repository;
-    private final LiveData<List<Word>> allWords;
     private  ExecutorService executorService;
 
     private boolean isEmpty;
@@ -28,7 +27,6 @@ public class WordViewModel extends AndroidViewModel {
         Log.d(TAG, "WordViewModel initialized");
         executorService = Executors.newSingleThreadExecutor();
         repository = new WordRepository(application);
-        allWords = repository.getAllWords();
 
 
 
@@ -111,6 +109,11 @@ public class WordViewModel extends AndroidViewModel {
             Log.d(TAG, "isEmpty: " + isEmpty);
         });
         return isEmpty;
+    }
+
+    public int getTotalCount() {
+
+        return repository.getTotalCount();
     }
 
 

@@ -28,6 +28,7 @@ public class QuizBaseFragment extends Fragment {
     protected View quizCardBack;
 
     protected Button btnSubmit;
+    protected boolean isSubmitted;
 
 
     @Nullable
@@ -43,7 +44,8 @@ public class QuizBaseFragment extends Fragment {
     protected void OnQuized(float difficulty){
         Log.d("QuizBaseFragment", "OnQuized: difficulty="+difficulty);
 
-        reviewScheduler.WordReviewed(word, difficulty);
+        if(!isSubmitted)reviewScheduler.WordReviewed(word, difficulty);
+        isSubmitted = true;
     }
 
     public void setWord(LiveData<Word> word){

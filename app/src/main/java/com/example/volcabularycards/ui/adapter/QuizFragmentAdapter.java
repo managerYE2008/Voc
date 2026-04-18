@@ -28,10 +28,10 @@ public class QuizFragmentAdapter extends FragmentStateAdapter {
     private final List<LiveData<Word>> words = new ArrayList<>();
     private Map<Integer, QuizBaseFragment> fragmentMap = new HashMap<>();
     
-    private static final int SelectChMasteryLevel = 3000;
-    private static final int SelectEnMasteryLevel = 6000;
-    private static final int SpellPartMasteryLevel = 8000;
-    private static final int SpellWholeMasteryLevel = 9000;
+    private static final int SelectChMasteryLevel = 200;
+    private static final int SelectEnMasteryLevel = 700;
+    private static final int SpellPartMasteryLevel = 2500;
+
     
     
     public QuizFragmentAdapter(@NonNull FragmentManager fragmentManager, @NonNull Lifecycle lifecycle) {

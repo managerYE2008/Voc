@@ -8,6 +8,7 @@ import android.view.View;
 import android.view.ViewGroup;
 import android.widget.Button;
 import android.widget.TextView;
+import android.widget.Toast;
 
 import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
@@ -37,7 +38,7 @@ public class SelectCh extends QuizBaseFragment{
         Log.d(TAG, "onCreateView: ");
 
         setCardFront(R.layout.select_ch);
-        difficulty=0.3f;
+        difficulty=1.2f;
         
         if (quizCardFront == null) {
             Log.e(TAG, "quizCardFront is null!");
@@ -127,6 +128,7 @@ public class SelectCh extends QuizBaseFragment{
         
         if (selectedAnswer == -1) {
             Log.w(TAG, "No answer selected!");
+            Toast.makeText(getContext(), "请选择一个答案", Toast.LENGTH_SHORT);
             return;
         }
         
@@ -148,7 +150,7 @@ public class SelectCh extends QuizBaseFragment{
         }
         
         Log.d(TAG, "Calling OnQuized with difficulty: " + (isCorrect ? difficulty : difficulty / 3));
-        OnQuized(isCorrect ? difficulty : difficulty / 3);
+        OnQuized(isCorrect ? difficulty : 0.2f);
     }
 
     private void onSelected(int index){

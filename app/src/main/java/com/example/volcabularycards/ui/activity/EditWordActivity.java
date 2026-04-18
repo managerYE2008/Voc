@@ -50,6 +50,7 @@ public class EditWordActivity extends AppCompatActivity {
             isAddingWord = bundle.getBoolean("is_adding_word");
             if(!isAddingWord){
                 int wordId = bundle.getInt("word_id");
+                isLearning = bundle.getBoolean("is_learning");
 
 
 
@@ -69,8 +70,8 @@ public class EditWordActivity extends AppCompatActivity {
                         if (wordMeaning != null) editTextMeaning.setText(wordMeaning);
                         if (wordAnnotation != null) editTextAnnotation.setText(wordAnnotation);
 
-                        isLearning = word.isLearning();
-
+                        if(!isLearning) isLearning = word.isLearning();
+                        updateStarIcon();
                         android.util.Log.d("EditWordActivity", "Loaded word: id=" + word.getId() +
                                 ", text=" + word.getText() +
                                 ", is_learning=" + isLearning);

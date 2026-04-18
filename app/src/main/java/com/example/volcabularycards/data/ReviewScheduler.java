@@ -31,12 +31,12 @@ public class ReviewScheduler {
     private static final long MINUTE_IN_MILLIS = 60 * 1000;
     private static final long HOUR_IN_MILLIS = 60 * MINUTE_IN_MILLIS;
     private static final long SECOND_IN_MILLIS = 1000;
-    private static final double RetrievabilityFinal=0.9;
-    private static final long remainingTime=50*DAY_IN_MILLIS;
+    private static final double RetrievabilityFinal=0.8;
+    private static final long remainingTime = 7 * DAY_IN_MILLIS;//20 days after review still has 80% left in memory
     private static final long StabilityFinal=(long)(-(remainingTime)/Math.log(RetrievabilityFinal));
-    private static final double k=0.6;
+    private static final double k=0.8;
     private static final double b_early=1.0;
-    private static final double b_late=0.05;
+    private static final double b_late=0.01;
 
 
 
@@ -73,8 +73,8 @@ public class ReviewScheduler {
         }
         List<Word> reviewWords=new ArrayList<>();
         wordInfos.sort((a, b) -> {
-            if (b.VarForCmp > a.VarForCmp) return -1;
-            if (b.VarForCmp < a.VarForCmp) return 1;
+            if (a.VarForCmp < b.VarForCmp) return -1;
+            if (a.VarForCmp > b.VarForCmp) return 1;
             return 0;
         });
         for(WordInfo wordInfo:wordInfos){
@@ -100,8 +100,8 @@ public class ReviewScheduler {
         }
         List<Word> reviewWords=new ArrayList<>();
         wordInfos.sort((a, b) -> {
-            if (b.VarForCmp > a.VarForCmp) return -1;
-            if (b.VarForCmp < a.VarForCmp) return 1;
+            if (a.VarForCmp < b.VarForCmp) return -1;
+            if (a.VarForCmp > b.VarForCmp) return 1;
             return 0;
         });
         for(int i=0;i<amount&&i<wordInfos.size();i++){
@@ -109,6 +109,8 @@ public class ReviewScheduler {
         }
         return reviewWords;
     }
+
+
 
 
     public static void WordReviewed(LiveData<Word> word, float difficulty) {
@@ -151,7 +153,7 @@ public class ReviewScheduler {
         long Stability;
         Stability=calculateStability(word.getMasteryLevel());
         long timePast=timeNow-word.getLastReviewTime();
-        double timePercentage=(double)(timePast-calculateTOpt(word))/calculateTOpt(word);
+        double timePercentage=(double)(timePast)/calculateTOpt(word);
         Log.d("ReviewScheduler_Calc", String.format(
             "Word: %s | Stability: %d | TimePast: %d hrs | TOpt: %d hrs | TimePercentage: %.2f",
             word.getText(),
@@ -160,7 +162,7 @@ public class ReviewScheduler {
             calculateTOpt(word) / (60 * 60 * 1000),
             timePercentage
         ));
-        double x=b_early*((-1.0f/(timePercentage+1))+1);
+        double x=b_early*((-1.0f/(timePercentage))+1);
         if(x>0) x=-(double)b_late*(timePercentage);
         Log.d("ReviewScheduler_Calc", String.format(
             "Exponent x: %.4f | Difficulty: %.2f | Result: %d",
@@ -216,7 +218,7 @@ public class ReviewScheduler {
 
     private static long calculateTOpt(Word word) {
         long TOpt;
-        TOpt = -(long)(Math.log(0.9)*calculateStability(word.getMasteryLevel()));
+        TOpt = -(long)(Math.log(RetrievabilityFinal)*calculateStability(word.getMasteryLevel()));
 
         return TOpt;
     }
@@ -232,7 +234,7 @@ public class ReviewScheduler {
 
     public static float setMasterLevel(long Stability){
         float MasteryLevel;
-        MasteryLevel=(float)(Math.pow((double)Stability*100/StabilityFinal,2));
+        MasteryLevel=(float)Math.pow((double)Stability*100/StabilityFinal,2);
         return MasteryLevel;
 
     }
@@ -242,6 +244,7 @@ public class ReviewScheduler {
 
 
         public double VarForCmp;
+        private static double priorityAdjustmentFactor=0.5;
 
 
 
@@ -250,8 +253,15 @@ public class ReviewScheduler {
         public WordInfo(Word word,long timeNow) {
             this.word = word;
             //Retrievability=calculateRetrievability(word,timeNow);
-            VarForCmp=(double)(timeNow-word.getLastReviewTime())/calculateStability(word.getMasteryLevel());//与Retrievability成负相关
+            //VarForCmp=(double)(timeNow-word.getLastReviewTime())/calculateStability(word.getMasteryLevel());//与Retrievability成负相关
 
+            double timePercentage=(double)(timeNow-word.getLastReviewTime())/calculateTOpt(word);
+            VarForCmp=((double)-1.0f/timePercentage)+1;
+            if(VarForCmp<0){
+                VarForCmp=-VarForCmp;
+            }else{
+                VarForCmp*=priorityAdjustmentFactor;
+            }
         }
 
 

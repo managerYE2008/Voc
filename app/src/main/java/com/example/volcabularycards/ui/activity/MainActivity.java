@@ -5,6 +5,8 @@ import android.os.Bundle;
 import android.os.Environment;
 import android.util.Log;
 import android.widget.Button;
+import android.widget.SeekBar;
+import android.widget.Toast;
 
 import androidx.activity.EdgeToEdge;
 import androidx.appcompat.app.AppCompatActivity;
@@ -25,6 +27,13 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
+    private Button btnImport;
+    private Button btnSelectWords;
+    private Button btnSearchWord;
+    private Button btnQuiz;
+    private WordViewModel wordViewModel;
+    private SeekBar seekBar;
+    private int quizWordsCount = 0;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -32,33 +41,80 @@ public class MainActivity extends AppCompatActivity {
         setContentView(R.layout.activity_main);
         Log.d("MainActivity", "onCreate called");
 
-        Button btnStart = findViewById(R.id.btn_start);
-        btnStart.setOnClickListener(v -> {
-            // 跳转到单词卡复习界面
-            startCardActivity();
-        });
 
-        Button btnImport = findViewById(R.id.btn_import_excel);
+
+        btnImport = findViewById(R.id.btn_import_excel);
         btnImport.setOnClickListener(v -> {
             // 跳转到 Excel 导入界面
             startImportActivity();
         });
 
-        Button btnSelectWords = findViewById(R.id.btn_select_words);
+        btnSelectWords = findViewById(R.id.btn_select_words);
         btnSelectWords.setOnClickListener(v -> {
             // 跳转到选择单词界面
             startSelectWordsActivity();
         });
 
-        Button btnSearchWord = findViewById(R.id.btn_search_word);
+        btnSearchWord = findViewById(R.id.btn_search_word);
         btnSearchWord.setOnClickListener(v -> {
             // 跳转到搜索单词界面
             startSearchWordActivity();
         });
 
-        Button btnQuiz = findViewById(R.id.btn_quiz);
+        btnQuiz = findViewById(R.id.btn_quiz);
         btnQuiz.setOnClickListener(v -> {
             startQuizActivity();
+        });
+        
+        wordViewModel = new ViewModelProvider(this).get(WordViewModel.class);
+        seekBar = findViewById(R.id.seek_bar);
+        seekBar.setMax(50);
+        seekBar.setProgress(10);
+        Thread thread = new Thread(() -> {
+            try {
+                Thread.sleep(500);
+                int count = wordViewModel.getTotalCount();
+                Log.d("MainActivity", "Total words count: " + count);
+                runOnUiThread(() -> {
+                    if (count > 0) {
+                        seekBar.setMax(count);
+                        Log.d("MainActivity", "Total words count: " + count);
+                        seekBar.setProgress(count);
+                    }
+                });
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        thread.start();
+        
+        seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
+            @Override
+            public void onProgressChanged(SeekBar seekBar, int progress, boolean fromUser) {
+                quizWordsCount = progress;
+                Log.d("MainActivity", "SeekBar progress changed: " + progress);
+            }
+
+            @Override
+            public void onStartTrackingTouch(SeekBar seekBar) {
+                Log.d("MainActivity", "SeekBar touch started");
+            }
+
+            @Override
+            public void onStopTrackingTouch(SeekBar seekBar) {
+
+                int progress = seekBar.getProgress();
+                if(progress>0){
+                    Toast.makeText(MainActivity.this, "测验单词数量: " + progress, Toast.LENGTH_SHORT).show();
+                    Log.d("MainActivity", "SeekBar progress changed: " + progress);
+                    btnQuiz.setText("开始测验");
+                }
+                else{
+                    Toast.makeText(MainActivity.this, "就是看看", Toast.LENGTH_SHORT).show();
+                    btnQuiz.setText("就是看看");
+                }
+
+            }
         });
 
         WordDatabase wordDatabase = WordDatabase.getInstance(this);
@@ -66,6 +122,30 @@ public class MainActivity extends AppCompatActivity {
             addSampleWords();
             WordDatabase.setIsFirstTime(this);
         }
+        
+
+    }
+    @Override
+    protected void onResume() {
+        super.onResume();
+        Log.d("MainActivity", "onResume called");
+        Thread thread = new Thread(() -> {
+            try {
+                Thread.sleep(500);
+                int count = wordViewModel.getTotalCount();
+                Log.d("MainActivity", "Total words count: " + count);
+                runOnUiThread(() -> {
+                    if (count > 0) {
+                        seekBar.setMax(count);
+                        Log.d("MainActivity", "Total words count: " + count);
+                        seekBar.setProgress(Math.min(count, quizWordsCount));
+                    }
+                });
+            } catch (InterruptedException e) {
+                e.printStackTrace();
+            }
+        });
+        thread.start();
     }
 
     private void addSampleWords() {
@@ -78,6 +158,7 @@ public class MainActivity extends AppCompatActivity {
         word0.setMeaning("全世界最好的应用");
         word0.setAnnotation("不是 woc 是 Voc");
         word0.setLearning(true);
+        word0.setMasteryLevel(9999.0f);
 
         // 复制 drawable 资源到内部存储并获取路径
         String imagePath = copyImageFromDrawableToInternalStorage(R.drawable.the_creator);
@@ -99,51 +180,59 @@ public class MainActivity extends AppCompatActivity {
         Word word3 = new Word();
         word3.setText("orange");
         word3.setMeaning("橙子");
+        word3.setMasteryLevel(1.0f);
         sampleWords.add(word3);
 
         Word word4 = new Word();
         word4.setText("computer");
         word4.setMeaning("电脑");
+        word4.setMasteryLevel(1.0f);
         sampleWords.add(word4);
 
         Word word5 = new Word();
         word5.setText("language");
         word5.setMeaning("语言");
+        word5.setMasteryLevel(201.0f);
         sampleWords.add(word5);
 
         Word word6 = new Word();
         word6.setText("book");
         word6.setMeaning("书");
+        word6.setMasteryLevel(201.0f);
         sampleWords.add(word6);
 
         Word word7 = new Word();
         word7.setText("phone");
         word7.setMeaning("手机");
+        word7.setMasteryLevel(701.0f);
         sampleWords.add(word7);
 
         Word word8 = new Word();
         word8.setText("car");
         word8.setMeaning("汽车");
+        word8.setMasteryLevel(701.0f);
         sampleWords.add(word8);
 
         Word word9 = new Word();
         word9.setText("house");
         word9.setMeaning("房子");
+        word9.setMasteryLevel(2501.0f);
         sampleWords.add(word9);
 
         Word word10 = new Word();
         word10.setText("tree");
         word10.setMeaning("树");
+        word10.setMasteryLevel(2501.0f);
         sampleWords.add(word10);
 
-        WordViewModel wordViewModel = new ViewModelProvider(this).get(WordViewModel.class);
+
 
         wordViewModel.insertAll(sampleWords);
         Log.d("MainActivity", "Sample words inserted, count: " + sampleWords.size());
     }
 
     private String copyImageFromDrawableToInternalStorage(int resourceId) {
-        String fileName = "sample_image_" + resourceId + ".png";
+        String fileName = "sample_image_" + resourceId + ".jpg";
         File file = new File(getExternalFilesDir(Environment.DIRECTORY_PICTURES), fileName);
 
         try {
@@ -154,7 +243,7 @@ public class MainActivity extends AppCompatActivity {
 
                 // 将 Bitmap 保存到文件
                 try (FileOutputStream fos = new FileOutputStream(file)) {
-                    bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, fos);
+                    bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 70, fos);
                 }
             } else {
                 // 如果不是 BitmapDrawable（如 VectorDrawable），使用 Canvas 绘制到 bitmap
@@ -167,7 +256,7 @@ public class MainActivity extends AppCompatActivity {
 
                 // 将 Bitmap 保存到文件
                 try (FileOutputStream fos = new FileOutputStream(file)) {
-                    bitmap.compress(android.graphics.Bitmap.CompressFormat.PNG, 100, fos);
+                    bitmap.compress(android.graphics.Bitmap.CompressFormat.JPEG, 70, fos);
                 }
             }
 
@@ -199,7 +288,20 @@ public class MainActivity extends AppCompatActivity {
         startActivity(intent);
     }
     private void startQuizActivity() {
-        Intent intent = new Intent(this, QuizActivity.class);
-        startActivity(intent);
+
+        if(quizWordsCount>0){
+            Intent intent = new Intent(this, QuizActivity.class);
+            Bundle bundle = new Bundle();
+            bundle.putInt("quiz_words_count", quizWordsCount);
+            intent.putExtras(bundle);
+
+            startActivity(intent);
+
+        }
+        else{
+            Intent intent = new Intent(this, CardReviewActivity.class);
+            startActivity(intent);
+        }
+
     }
 }

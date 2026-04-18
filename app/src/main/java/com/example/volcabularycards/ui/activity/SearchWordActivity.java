@@ -156,6 +156,8 @@ public class SearchWordActivity extends AppCompatActivity {
                 intent.putExtra("word_meaning", word.getMeaning());
                 intent.putExtra("word_annotation", word.getAnnotation());
                 intent.putExtra("image_path", word.getImagePath());
+                intent.putExtra("is_adding_word", false);
+                intent.putExtra("is_learning", true);
                 holder.itemView.getContext().startActivity(intent);
             });
         }

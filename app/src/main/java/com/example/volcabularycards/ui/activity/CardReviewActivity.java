@@ -100,7 +100,7 @@ public class CardReviewActivity extends AppCompatActivity {
             if (words != null && !words.isEmpty()) {
                 LiveData<Word> firstWord = adapter.getWord(0);
                 if (firstWord != null && firstWord.getValue() != null) {
-                    ReviewScheduler.WordReviewed(firstWord, 0.5f);
+                    ReviewScheduler.WordReviewed(firstWord, 0.001f);
                     Log.d(TAG, "Reviewed first word: " + firstWord.getValue().getText());
                 }
             }
@@ -117,7 +117,7 @@ public class CardReviewActivity extends AppCompatActivity {
                 super.onPageSelected(position);
                 lastPosition = position;
                 Log.d(TAG, "Page changed to position: " + position);
-                ReviewScheduler.WordReviewed(adapter.getWord(position),0.05f);
+                ReviewScheduler.WordReviewed(adapter.getWord(position),0.001f);
             }
         };
         viewPager.registerOnPageChangeCallback(viewPagerCallback);

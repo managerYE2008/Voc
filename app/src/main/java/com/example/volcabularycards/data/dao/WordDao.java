@@ -43,7 +43,7 @@ public interface WordDao {
     @Query("DELETE FROM word")
     void deleteAll();
 
-    @Query("SELECT COUNT(*)")
+    @Query("SELECT COUNT(*) from word where is_learning")
     int getTotalCount();
     
     @Query("SELECT CASE WHEN COUNT(*) > 0 THEN 0 ELSE 1 END")

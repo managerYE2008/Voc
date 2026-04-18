@@ -2,69 +2,99 @@
 <androidx.constraintlayout.widget.ConstraintLayout xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     xmlns:tools="http://schemas.android.com/tools"
-    android:id="@+id/main"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context=".ui.activity.MainActivity">
-
-    <Button
-        android:id="@+id/btn_start"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="开始"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.55" />
+    android:background="@android:color/transparent"
+    android:gravity="center">
 
     <Button
         android:id="@+id/btn_import_excel"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
-        android:text="批量导入单词"
+        android:layout_marginEnd="8dp"
+        android:layout_marginBottom="8dp"
+        android:text="导入单词"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintHorizontal_bias="1.0"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.68" />
-
-    <Button
-        android:id="@+id/btn_select_words"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="选择单词"
-        app:layout_constraintBottom_toBottomOf="parent"
-        app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
-        app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.81" />
+        app:layout_constraintTop_toBottomOf="@+id/edit_word_view"
+        app:layout_constraintVertical_bias="0.975" />
 
     <Button
         android:id="@+id/btn_search_word"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
+        android:layout_marginStart="8dp"
+        android:layout_marginBottom="8dp"
         android:text="搜索单词"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
+        app:layout_constraintHorizontal_bias="0.026"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.94" />
+        app:layout_constraintTop_toBottomOf="@+id/edit_word_view"
+        app:layout_constraintVertical_bias="0.878" />
 
-    <Button
-        android:id="@+id/btn_quiz"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="开始测验"
+    <androidx.cardview.widget.CardView
+        android:id="@+id/edit_word_view"
+        android:layout_width="347dp"
+        android:layout_height="597dp"
+        android:layout_gravity="center"
+        android:background="@color/material_dynamic_secondary70"
+        android:translationY="-30sp"
+        app:cardBackgroundColor="@color/material_dynamic_secondary90"
+        app:cardCornerRadius="24dp"
+        app:cardElevation="16dp"
+        app:cardUseCompatPadding="true"
         app:layout_constraintBottom_toBottomOf="parent"
         app:layout_constraintEnd_toEndOf="parent"
-        app:layout_constraintHorizontal_bias="0.498"
         app:layout_constraintStart_toStartOf="parent"
-        app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.42" />
+        app:layout_constraintTop_toTopOf="parent">
+
+        <androidx.constraintlayout.widget.ConstraintLayout
+            android:layout_width="match_parent"
+            android:layout_height="match_parent">
+
+            <SeekBar
+                android:id="@+id/seek_bar"
+                android:layout_width="239dp"
+                android:layout_height="23dp"
+                app:layout_constraintBottom_toTopOf="@+id/btn_select_words"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.494"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toBottomOf="@+id/btn_quiz"
+                app:layout_constraintVertical_bias="0.428" />
+
+            <Button
+                android:id="@+id/btn_quiz"
+                android:layout_width="206dp"
+                android:layout_height="88dp"
+                android:fontFamily="monospace"
+                android:text="开始测验"
+                android:textAlignment="center"
+                android:textAppearance="@style/TextAppearance.AppCompat.Body1"
+                android:textSize="32sp"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintHorizontal_bias="0.494"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.322" />
+
+            <Button
+                android:id="@+id/btn_select_words"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="挑点新的"
+                app:layout_constraintBottom_toBottomOf="parent"
+                app:layout_constraintEnd_toEndOf="parent"
+                app:layout_constraintStart_toStartOf="parent"
+                app:layout_constraintTop_toTopOf="parent"
+                app:layout_constraintVertical_bias="0.839" />
+
+        </androidx.constraintlayout.widget.ConstraintLayout>
+
+    </androidx.cardview.widget.CardView>
 
 </androidx.constraintlayout.widget.ConstraintLayout>
