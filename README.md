@@ -1,2 +1,2 @@
 # Voc
-An application that helps people memorize volcabularies
+An app that helps you memorize vocabulary with ease.
