@@ -44,7 +44,7 @@ public interface WordDao {
     void deleteAll();
 
     @Query("SELECT COUNT(*) from word where is_learning")
-    int getTotalCount();
+    int getReviewTotalCount();
     
     @Query("SELECT CASE WHEN COUNT(*) > 0 THEN 0 ELSE 1 END")
     boolean isEmpty();
@@ -52,11 +52,12 @@ public interface WordDao {
 
 
 
-    @Query("Select * from word where text like '%' || :keyword || '%'")
+    @Query("SELECT * FROM word WHERE text LIKE '%' || :keyword || '%' ORDER BY LENGTH(text) ASC")
     LiveData<List<Word>> search(String keyword);
 
     @Query("Select * from word where is_learning and mastery_level<10000 Order by last_review_time ASC")
     LiveData<List<Word>> getReviewWordsLive();
+
 
     @Query("Select * from word where is_learning and mastery_level<10000 Order by last_review_time ASC")
     List<Word> getReviewWords();

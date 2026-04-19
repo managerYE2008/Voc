@@ -17,9 +17,11 @@ import androidx.core.view.WindowInsetsCompat;
 import androidx.lifecycle.ViewModelProvider;
 
 import com.example.volcabularycards.R;
+import com.example.volcabularycards.data.ReviewScheduler;
 import com.example.volcabularycards.data.Word;
 import com.example.volcabularycards.data.WordDatabase;
 import com.example.volcabularycards.ui.viewmodel.WordViewModel;
+import com.google.android.material.floatingactionbutton.FloatingActionButton;
 
 import java.io.File;
 import java.io.FileOutputStream;
@@ -27,9 +29,9 @@ import java.util.ArrayList;
 import java.util.List;
 
 public class MainActivity extends AppCompatActivity {
-    private Button btnImport;
+    private FloatingActionButton btnImport;
     private Button btnSelectWords;
-    private Button btnSearchWord;
+    private FloatingActionButton btnSearchWord;
     private Button btnQuiz;
     private WordViewModel wordViewModel;
     private SeekBar seekBar;
@@ -65,28 +67,35 @@ public class MainActivity extends AppCompatActivity {
         btnQuiz.setOnClickListener(v -> {
             startQuizActivity();
         });
-        
-        wordViewModel = new ViewModelProvider(this).get(WordViewModel.class);
         seekBar = findViewById(R.id.seek_bar);
         seekBar.setMax(50);
         seekBar.setProgress(10);
-        Thread thread = new Thread(() -> {
+        
+        wordViewModel = new ViewModelProvider(this).get(WordViewModel.class);
+        Thread getOptimalQuizAmount = new Thread(() -> {
+            List<Word> words=wordViewModel.getReviewWords();
+            ReviewScheduler.init(wordViewModel);
+            ReviewScheduler.getReviewWords(words);
+            quizWordsCount = ReviewScheduler.getOptimalReviewAmount();
             try {
                 Thread.sleep(500);
-                int count = wordViewModel.getTotalCount();
+                int count = wordViewModel.getReviewTotalCount();
                 Log.d("MainActivity", "Total words count: " + count);
                 runOnUiThread(() -> {
                     if (count > 0) {
                         seekBar.setMax(count);
                         Log.d("MainActivity", "Total words count: " + count);
-                        seekBar.setProgress(count);
+                        seekBar.setProgress(quizWordsCount);
                     }
                 });
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+
         });
-        thread.start();
+        getOptimalQuizAmount.start();
+
+
         
         seekBar.setOnSeekBarChangeListener(new SeekBar.OnSeekBarChangeListener() {
             @Override
@@ -129,23 +138,28 @@ public class MainActivity extends AppCompatActivity {
     protected void onResume() {
         super.onResume();
         Log.d("MainActivity", "onResume called");
-        Thread thread = new Thread(() -> {
+        Thread getOptimalQuizAmount = new Thread(() -> {
+            List<Word> words=wordViewModel.getReviewWords();
+            ReviewScheduler.init(wordViewModel);
+            ReviewScheduler.getReviewWords(words);
+            quizWordsCount = ReviewScheduler.getOptimalReviewAmount();
             try {
                 Thread.sleep(500);
-                int count = wordViewModel.getTotalCount();
+                int count = wordViewModel.getReviewTotalCount();
                 Log.d("MainActivity", "Total words count: " + count);
                 runOnUiThread(() -> {
                     if (count > 0) {
                         seekBar.setMax(count);
                         Log.d("MainActivity", "Total words count: " + count);
-                        seekBar.setProgress(Math.min(count, quizWordsCount));
+                        seekBar.setProgress(quizWordsCount);
                     }
                 });
             } catch (InterruptedException e) {
                 e.printStackTrace();
             }
+
         });
-        thread.start();
+        getOptimalQuizAmount.start();
     }
 
     private void addSampleWords() {

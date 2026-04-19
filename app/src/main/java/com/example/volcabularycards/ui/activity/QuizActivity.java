@@ -33,6 +33,7 @@ public class QuizActivity extends AppCompatActivity {
     private int lastPosition = 0;
     private ViewPager2.OnPageChangeCallback viewPagerCallback;
     private boolean isInitialDataLoaded = false;
+    private int amount;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -51,6 +52,12 @@ public class QuizActivity extends AppCompatActivity {
 
         viewPager.setOffscreenPageLimit(2);
         viewPager.setPageTransformer(new QuizPageTransformer(viewPager));
+        Bundle bundle = getIntent().getExtras();
+        if (bundle != null) {
+            amount = bundle.getInt("quiz_words_count");
+            Log.d(TAG, "Amount: " + amount);
+
+        }
 
         wordViewModel.getReviewWordsLive().observe(this, words -> {
             if (isInitialDataLoaded) {
@@ -59,7 +66,7 @@ public class QuizActivity extends AppCompatActivity {
             
             Log.d(TAG, "ReviewWordsLive updated with " + (words != null ? words.size() : 0) + " words.");
 
-            List<Word> reviewWords = ReviewScheduler.getReviewWords(words);
+            List<Word> reviewWords = ReviewScheduler.getReviewWords(words,amount);
             Log.d(TAG, "ReviewScheduler returned " + (reviewWords != null ? reviewWords.size() : 0) + " words");
             updateUI(reviewWords);
             

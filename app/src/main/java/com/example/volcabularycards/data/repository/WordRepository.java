@@ -147,8 +147,8 @@ public class WordRepository {
      * 获取词汇总数
      * @return 单词总数
      */
-    public int getTotalCount() {
-        return wordDao.getTotalCount();
+    public int getReviewTotalCount() {
+        return wordDao.getReviewTotalCount();
     }
 
     /**

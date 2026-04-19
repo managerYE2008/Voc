@@ -56,8 +56,6 @@ public class SelectWordsActivity extends AppCompatActivity {
         viewPager.setPageTransformer(new SelectWordPageTransformer(viewPager));
 
         // 初始化按钮
-        btnQuit = findViewById(R.id.btn_quit_word_select);
-        btnQuit.setOnClickListener(view -> finish());
 
         Log.d(TAG, "ViewPager initialized, adapter created");
 

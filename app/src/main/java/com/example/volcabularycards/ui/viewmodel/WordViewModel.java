@@ -111,9 +111,9 @@ public class WordViewModel extends AndroidViewModel {
         return isEmpty;
     }
 
-    public int getTotalCount() {
+    public int getReviewTotalCount() {
 
-        return repository.getTotalCount();
+        return repository.getReviewTotalCount();
     }
 
 
@@ -130,13 +130,15 @@ public class WordViewModel extends AndroidViewModel {
         return repository.getReviewWordsLive();
     }
 
+    public List<Word> getReviewWords(){
+        return repository.getReviewWords();
+    }
+
     public LiveData<List<Word>> getNotLearningWords(){
         return repository.getReviewWordsLive();
     }
 
-    public LiveData<List<Word>> getReviewWords(){
-        return repository.getReviewWordsLive();
-    }
+
 
     public LiveData<List<Word>> getNotLearningWordsLive(){
         return repository.getNotLearningWordsLive();

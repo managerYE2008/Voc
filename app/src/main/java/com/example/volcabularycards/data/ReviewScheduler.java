@@ -37,6 +37,8 @@ public class ReviewScheduler {
     private static final double k=0.8;
     private static final double b_early=1.0;
     private static final double b_late=0.01;
+    private static int optimalReviewAmount;
+    private static final double optimalVarForCmp=0.4;
 
 
 
@@ -77,8 +79,12 @@ public class ReviewScheduler {
             if (a.VarForCmp > b.VarForCmp) return 1;
             return 0;
         });
+        optimalReviewAmount=0;
         for(WordInfo wordInfo:wordInfos){
             reviewWords.add(wordInfo.word);
+            if(wordInfo.VarForCmp<optimalVarForCmp){
+                optimalReviewAmount++;
+            }
         }
         Log.d("ReviewScheduler", "Final review list size: " + reviewWords.size());
         return reviewWords;
@@ -104,10 +110,19 @@ public class ReviewScheduler {
             if (a.VarForCmp > b.VarForCmp) return 1;
             return 0;
         });
-        for(int i=0;i<amount&&i<wordInfos.size();i++){
+        optimalReviewAmount=0;
+        for(int i=0;i<amount&&i<wordInfos.size()||wordInfos.get(i).VarForCmp<optimalVarForCmp;i++){
             reviewWords.add(wordInfos.get(i).word);
+            if(wordInfos.get(i).VarForCmp<optimalVarForCmp){
+                optimalReviewAmount++;
+            }
+
         }
         return reviewWords;
+    }
+    public static int getOptimalReviewAmount(){
+
+        return optimalReviewAmount;
     }
 
 

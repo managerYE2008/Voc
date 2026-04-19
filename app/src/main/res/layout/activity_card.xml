@@ -39,8 +39,9 @@
 
     <androidx.viewpager2.widget.ViewPager2
         android:id="@+id/viewPager"
-        android:layout_width="412dp"
-        android:layout_height="654dp"
+        android:layout_width="405dp"
+        android:layout_height="615dp"
+        android:layout_marginTop="16dp"
         android:layout_marginBottom="32dp"
         android:background="@color/white"
         android:clipChildren="false"
@@ -51,7 +52,7 @@
         app:layout_constraintEnd_toEndOf="parent"
         app:layout_constraintStart_toStartOf="parent"
         app:layout_constraintTop_toTopOf="parent"
-        app:layout_constraintVertical_bias="0.0"
+        app:layout_constraintVertical_bias="0.455"
         app:layout_constraintVertical_chainStyle="packed">
 
     </androidx.viewpager2.widget.ViewPager2>
